@@ -1,0 +1,109 @@
+<!-- SSR/fallback HTML source of spout.finance, captured 10/09/2026.
+     Primary evidence for FP-APP-4/6 (KYC compliance claim vs observed behavior).
+     The FAQPage JSON-LD block below explicitly states KYC is enforced wallet-level
+     on "all tokenized asset holders" with no exception noted for beta/devnet. -->
+<!doctype html>
+<html lang="en">
+    <head>
+        <title>spout finance — Borrow at 0% interest</title>
+        <meta name="description" content="Borrow against your stocks at 0% interest. Unlock liquidity without selling your equities — spout finance."/>
+        <link rel="canonical" href="https://spout.finance/"/>
+
+        <script type="application/ld+json">
+            {
+                "@context": "https://schema.org",
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "How does borrowing at 0% interest actually work?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "You deposit tokenized US equities as collateral and borrow stablecoins at a 50% loan-to-value ratio. The interest rate is genuinely zero because Spout generates revenue from a covered call strategy running against the collateral pool, not from borrower interest payments. The collateral does the work so the borrower does not have to pay for it."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "What is the risk to borrowers?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Spout writes covered calls against your deposited shares. If an option expires in the money, you absorb the difference between the strike price and the market price for that cycle. Historically this cost averages around 0.5% annualized across the portfolio. You keep your shares in all scenarios, and positions are fully reconstituted after every cycle."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "How does Spout generate yield for lenders?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Lender yield comes from the variance risk premium: implied volatility on equity options consistently exceeds realized volatility, which means option sellers systematically collect more premium than the actual risk of exercise. Spout writes weekly covered calls against borrower collateral and distributes 80% of the collected premium to lenders. The portfolio currently targets double-digit APY across 11 assets."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "What assets can I borrow against?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Spout supports 11 tokenized US equities and ETFs at launch, spanning large-cap tech, AI, crypto-linked ETFs, pharmaceuticals, energy, gold, and financials. Each asset is backed 1:1 by real shares held at a regulated US broker-dealer, verifiable on-chain through Proof of Reserve."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "How do I get started?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Connect a supported Solana wallet, complete a one-time KYC verification, and you can deposit equities to borrow against or supply stablecoins to earn yield. The entire process takes minutes."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Is my collateral safe?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "All underlying shares are held at a FINRA-registered, SIPC-covered US broker-dealer in segregated custody. On-chain Proof of Reserve continuously verifies that the tokenized supply matches actual share holdings. The protocol operates at 200% collateralization, and an automated liquidation system protects lender capital if collateral value drops."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Can I withdraw at any time?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Lenders can withdraw deposited stablecoins at any time, subject to pool liquidity. Borrowers can repay their loan and reclaim collateral whenever they choose. There are no lockups on either side. The protocol runs weekly cycles, so capital naturally frees up on a regular cadence."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Is Spout compliant with US regulations?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Spout uses a regulated US broker-dealer for custody and options execution, enforces wallet-level KYC on all tokenized asset holders, and is structured to comply with applicable US securities laws. KYC data is stored off-chain with our regulated identity provider, and only a verified-status flag lives on-chain."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "What happens during a market crash?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "The protocol has multiple layers of protection. A VIX-based regime system automatically shifts to more conservative strike selection or halts new entries entirely during elevated volatility. Overcollateralization at 200% provides a deep equity buffer. An insurance fund absorbs cycle losses before lender principal is affected. Monte Carlo stress testing across thousands of simulated paths, including scenarios with severe crashes, shows positive net returns in over 99% of simulated years."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "How is Spout different from other DeFi lending protocols?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Most DeFi lending protocols generate yield purely from borrower interest, which limits rates to single digits during normal conditions. Spout adds a second yield source on top: systematic covered call premium harvested from the variance risk premium in equity options markets. This is the same strategy behind institutional products like JEPI and QYLD, but delivered through a DeFi lending framework with zero borrower interest, on-chain settlement, and permissionless access."
+                        }
+                    }
+                ]
+            }
+        </script>
+    </head>
+    <body>
+        <div id="root">
+            <main>
+                <h1>Spout Finance — borrow against your stocks at 0% interest</h1>
+                <p>Spout Finance lets you borrow against your tokenized US stocks at 0% interest, and lets lenders earn yield. Loans are funded by a disciplined covered-call strategy run per asset, not by charging borrowers interest.</p>
+            </main>
+        </div>
+    </body>
+</html>
