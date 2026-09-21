@@ -1,644 +1,646 @@
-# Spout Finance — Notas Cruas (Beta Intelligence Challenge)
+# Spout Finance — Raw Notes (Beta Intelligence Challenge)
 
-Status: Dia 0 — varredura de docs completa, aguardando primeira sessão no app.
-Beta code obtido: [09/09/2026]
-Wallet de teste: DHG4p1tKiXuQS2oYUMAnxR1P4YDgzGdkQfzJZfYoRnNV
-
----
-
-## Perfil do reviewer (pra Executive Summary)
-
-- Solana dev full-stack (Rust/Anchor), bounty hunter Superteam Brasil
-- Já testei lending/borrow DeFi (2º lugar Zodial — Superteam Germany)
-- Approach: sem seguir tutorial oficial na primeira sessão, documentar hesitação real
+Status: Day 0 — full docs sweep done, awaiting first app session.
+Beta code obtained: [09/09/2026]
+Test wallet: DHG4p1tKiXuQS2oYUMAnxR1P4YDgzGdkQfzJZfYoRnNV
 
 ---
 
-## FPs pré-carregados da varredura de documentação (validar contra o app)
+## Reviewer profile (for Executive Summary)
 
-### FP-DOC-1 — Yield alvo diverge entre páginas dos docs
-
-**What happened:** `/introduction` e `/how-lending-works` mostram Senior ~9% / Junior ~32% APY. `/what` mostra Senior ~7% / Junior ~25%+. A matemática detalhada em `/lending-tranches` confirma que 9%/32.8% são os números reais (7% é só a "priority yield" antes do excess split).
-
-**Why it caused friction:** Um usuário que lê só `/what` (página de overview) forma expectativa de retorno abaixo do real — ou, pior, se ler só a landing page, acima do que a página educacional mais detalhada sugere. Cost/yield disclosure inconsistente é exatamente o tipo de achado que rendeu 1º lugar ao Minkhanov na Zodial.
-
-**Severity:** High (candidato a Critical se a UI do app também usar o número de 7%)
-
-**Suggested improvement:** Padronizar todas as menções de APY pra usar o número blended (9%/32%), com nota clara de que a "priority yield" (7%) é só o piso garantido do Senior antes do split de excess.
-
-**TODO:** verificar qual número aparece na tela de deposit do app.
+- Full-stack Solana dev (Rust/Anchor), Superteam Brazil bounty hunter
+- Previously tested DeFi lending/borrow (2nd place, Zodial — Superteam Germany)
+- Approach: no official tutorial on the first session, document real hesitation
 
 ---
 
-### FP-DOC-2 — Liquidation fee: 5% flat (marketing) vs 8.8% no exemplo prático
+## Pre-loaded findings from the documentation sweep (to validate against the app)
 
-**What happened:** `/liquidation` e `/fee-structure` afirmam fee flat de 5%, comparando favoravelmente aos "10-15% padrão DeFi". Mas o cenário do Dave em `/scenarios` usa "NVDA's liquidation fee (8.8%, its per-asset buffer)" — linguagem que sugere fee variável por ativo, não flat.
+### FP-DOC-1 — Target yield diverges across docs pages
 
-**Why it caused friction:** Se a fee real varia por volatilidade do ativo (o que faz sentido do ponto de vista de risco), a claim de marketing "5% flat, melhor que o mercado" pode estar escondendo que ativos voláteis (NVDA, MSTR) pagam quase o dobro do anunciado.
+**What happened:** `/introduction` and `/how-lending-works` show Senior ~9% / Junior ~32% APY. `/what` shows Senior ~7% / Junior ~25%+. The detailed math on `/lending-tranches` confirms 9%/32.8% as the real numbers (7% is just the "priority yield" before the excess split).
 
-**Severity:** Critical (afeta diretamente a decisão de quanto colateral trazer e qual ativo escolher)
+**Why it caused friction:** A user who only reads `/what` (the overview page) forms an expectation of returns lower than the real one — or, worse, if they only read the landing page, higher than what the more detailed educational page suggests. Inconsistent cost/yield disclosure is exactly the kind of finding that won 1st place for Minkhanov on Zodial.
 
-**Suggested improvement:** Página de fees deveria mostrar a fee por ativo (como já faz pra LTV/cycle na tabela de `/supported-collateral`), não só um número flat genérico.
+**Severity:** High (candidate for Critical if the app UI also uses the 7% number)
 
-**TODO:** simular/observar liquidação (ou tela de preview de liquidação) em pelo menos 2 ativos de volatilidade diferente (ex: NVDA/MSTR vs PFE/GLD) e comparar a fee mostrada.
+**Suggested improvement:** Standardize every APY mention to use the blended number (9%/32%), with a clear note that "priority yield" (7%) is just the Senior floor before the excess split.
+
+**TODO:** check which number appears on the app's deposit screen.
 
 ---
 
-### FP-DOC-3 — "Keep every share, no losing your upside" vs mecânica real de assignment
+### FP-DOC-2 — Liquidation fee: 5% flat (marketing) vs 8.8% in the worked example
 
-**What happened:** Landing page / `/introduction`: "No selling, no taxable event, no losing your upside." Mas `/covered-call-strategy` e `/options-assignment` deixam claro que, em caso de assignment, as ações SÃO vendidas no strike — o upside acima do strike naquele ciclo é sacrificado. O FAQ chama isso de "bounded outcome", mas a claim da landing page ignora esse cenário por completo.
+**What happened:** `/liquidation` and `/fee-structure` claim a flat 5% fee, comparing favorably to the "10-15% DeFi standard." But Dave's scenario in `/scenarios` uses "NVDA's liquidation fee (8.8%, its per-asset buffer)" — language that suggests a variable per-asset fee, not flat.
 
-**Why it caused friction:** Um usuário que só lê a landing page (o funil de entrada de qualquer produto) forma uma expectativa de risco zero de upside que não é verdade. Isso é "leverage/risk framing" — exatamente o ângulo que diferenciou o 1º lugar do 2º na Zodial.
+**Why it caused friction:** If the real fee varies with asset volatility (which makes sense from a risk standpoint), the "5% flat, better than the market" marketing claim may be hiding that volatile assets (NVDA, MSTR) pay nearly double the advertised rate.
+
+**Severity:** Critical (directly affects the decision of how much collateral to bring and which asset to choose)
+
+**Suggested improvement:** The fees page should show the fee per asset (as it already does for LTV/cycle in the `/supported-collateral` table), not just a generic flat number.
+
+**TODO:** simulate/observe a liquidation (or the liquidation preview screen) on at least 2 assets of different volatility (e.g., NVDA/MSTR vs PFE/GLD) and compare the shown fee.
+
+---
+
+### FP-DOC-3 — "Keep every share, no losing your upside" vs the real assignment mechanic
+
+**What happened:** Landing page / `/introduction`: "No selling, no taxable event, no losing your upside." But `/covered-call-strategy` and `/options-assignment` make clear that upon assignment, shares ARE sold at the strike — the upside above the strike for that cycle is sacrificed. The FAQ calls this a "bounded outcome," but the landing page claim ignores this scenario entirely.
+
+**Why it caused friction:** A user who only reads the landing page (any product's entry funnel) forms an expectation of zero upside risk that isn't true. This is "leverage/risk framing" — exactly the angle that separated 1st from 2nd place on Zodial.
 
 **Severity:** High
 
-**Suggested improvement:** Landing page deveria trocar "no losing your upside" por algo como "no losing your upside below the strike" ou linkar diretamente pro FAQ de assignment.
+**Suggested improvement:** The landing page should swap "no losing your upside" for something like "no losing your upside below the strike," or link directly to the assignment FAQ.
 
-**TODO:** verificar se o app, no fluxo de lock/borrow, avisa sobre o risco de assignment ANTES do usuário confirmar a transação, ou só depois nos docs.
+**TODO:** check whether the app, in the lock/borrow flow, warns about assignment risk BEFORE the user confirms the transaction, or only afterward in the docs.
 
 ---
 
-### FP-DOC-4 — "LP reserve" mencionado sem explicação em nenhum lugar
+### FP-DOC-4 — "LP reserve" mentioned with no explanation anywhere
 
-**What happened:** `/distribution` menciona dedução de "protocol fee, insurance fund contribution, and the LP reserve" antes da distribuição pro lender. Mas `/settlement-flow` (página mais detalhada do mesmo fluxo) só lista protocol fee + insurance fund + senior priority + excess split — sem "LP reserve". O termo não aparece no glossário.
+**What happened:** `/distribution` mentions a deduction for "protocol fee, insurance fund contribution, and the LP reserve" before distributing to the lender. But `/settlement-flow` (the more detailed page for the same flow) only lists protocol fee + insurance fund + senior priority + excess split — no "LP reserve." The term doesn't appear in the glossary.
 
-**Why it caused friction:** Termo técnico não documentado que afeta diretamente quanto o lender recebe. Zero explicação de tamanho, propósito ou regra de acúmulo.
+**Why it caused friction:** An undocumented technical term that directly affects how much the lender receives. Zero explanation of size, purpose, or accrual rule.
 
 **Severity:** Medium
 
-**Suggested improvement:** Adicionar "LP reserve" ao glossário e reconciliar as duas páginas pra descreverem o mesmo fluxo de settlement de forma idêntica.
+**Suggested improvement:** Add "LP reserve" to the glossary and reconcile both pages to describe the same settlement flow identically.
 
-**TODO:** checar tela de distribution no app — o termo aparece ali? Em que valor?
+**TODO:** check the distribution screen in the app — does the term appear there? At what value?
 
 ---
 
-### FP-DOC-5 — Circuit breaker sem threshold público
+### FP-DOC-5 — Circuit breaker with no public threshold
 
-**What happened:** `/circuit-breakers`: "If the fund draws down past a defined threshold, new cycles for affected assets pause." O número nunca é revelado em nenhuma página.
+**What happened:** `/circuit-breakers`: "If the fund draws down past a defined threshold, new cycles for affected assets pause." The number is never revealed on any page.
 
-**Why it caused friction:** É um mecanismo de segurança estrutural importante (o que acontece quando o Insurance Fund já drenou bastante) mas o usuário não tem como avaliar quão perto desse limite o protocolo está a qualquer momento.
+**Why it caused friction:** This is an important structural safety mechanism (what happens when the Insurance Fund has already drained significantly), but the user has no way to gauge how close the protocol is to this limit at any given time.
 
 **Severity:** Medium
 
-**Suggested improvement:** Publicar o threshold numérico (ex: "pausa quando o fundo cai abaixo de X% do target") e mostrar isso na UI de transparência do fundo.
+**Suggested improvement:** Publish the numeric threshold (e.g., "pauses when the fund falls below X% of target") and show it in the fund transparency UI.
 
-**TODO:** ver se o app mostra saldo/histórico do Insurance Fund (docs dizem que sim: "current fund balance, target level, contribution rate, and drawdown history are visible in the app").
-
----
-
-## Ângulos de Financial Safety Analysis (a explorar durante o teste)
-
-1. **Weekend/overnight gap risk**: `/oracles` diz que fora do horário de mercado dos EUA o preço atualiza em "frequência reduzida". Ações têm gap de fim de semana / after-hours. Se NVDA abrir 15% abaixo na segunda, o Health Factor só reage quando o mercado abre? Existe proteção?
-2. **Tax withholding 30% pra não-US** (`/tax`) — relevante pro público BR, ângulo de conteúdo específico pra Superteam Brasil.
-3. **BSOL como colateral** — exposição a Solana via stock/ETF, ângulo natural pra puxar audiência cripto-nativa ("Onchain Native" persona dos docs).
-4. **Sensibilidade real da liquidation fee** — testar com pelo menos 2 ativos de volatilidade diferente.
+**TODO:** check whether the app shows the Insurance Fund's balance/history (docs say it should: "current fund balance, target level, contribution rate, and drawdown history are visible in the app").
 
 ---
 
-## FP-APP-10 — Recon técnico (DevTools): sem vazamento de chaves, mas polling ineficiente de RPC
+## Financial Safety Analysis angles (to explore during testing)
 
-**What happened:** Inspeção do Network tab (Fetch/XHR) na tela de Trade mostra chamadas diretas do browser pro RPC público `api.devnet.solana.com`, sem proxy de backend. São majoritariamente `getTokenAccountBalance` repetidas pras mesmas duas contas (`8KTa1mJHsy6UfswXP8HxQBVzcH4jgRkwh3hHqLDLLUFf`, `3rAWFGFUitzCXCouzU3fdwdYCaCBfSVCX3VYogyGeMc8`) mais `getAccountInfo` e `getMultipleAccounts`, todas repetindo a cada ~140-160ms.
-
-**Segurança (positivo):** Nenhuma API key ou secret visível nesses headers/payloads — faz sentido, pois RPC devnet público não exige auth. Não há vazamento aqui. Sources tab (busca por 'sk_', 'api_key', 'secret', etc no bundle JS) ainda não verificado.
-
-**Performance (achado técnico, não-crítico):** O padrão é polling ativo repetido em vez de subscription via WebSocket (`onAccountChange`/`accountSubscribe` do `@solana/web3.js`). Funciona bem em devnet com baixa carga, mas não escala — em mainnet, RPC público teria rate-limit rápido nesse volume de requests; mesmo com RPC dedicado (Helius, que é o que o produto provavelmente usará em produção), polling constante é desperdício de créditos de RPC comparado a subscriptions.
-
-**Severity:** Low/Info — não é bug, é sugestão de otimização de arquitetura.
-
-**TODO:** ainda falta checar Sources tab (busca de secrets no bundle) e Application tab (localStorage/cookies) — pendente.
+1. **Weekend/overnight gap risk**: `/oracles` says price updates at "reduced frequency" outside US market hours. Stocks have weekend/after-hours gaps. If NVDA opens 15% down on a Monday, does the Health Factor only react once the market opens? Is there any protection?
+2. **30% tax withholding for non-US** (`/tax`) — relevant for a BR audience, a specific content angle for Superteam Brazil.
+3. **BSOL as collateral** — Solana exposure via a stock/ETF, a natural angle to pull in a crypto-native audience (the docs' "Onchain Native" persona).
+4. **Real sensitivity of the liquidation fee** — test with at least 2 assets of different volatility.
 
 ---
 
-## FP-APP-11 — Lighthouse baseline (desktop, /buy) — excelente, e Sources tab sem secrets óbvios
+## FP-APP-10 — Technical recon (DevTools): no key leaks, but inefficient RPC polling
 
-**Lighthouse scores (desktop, beta.spout.finance/buy, 09/09/2026 20:39 GMT-3):**
+**What happened:** Inspecting the Network tab (Fetch/XHR) on the Trade screen shows direct browser calls to the public RPC `api.devnet.solana.com`, with no backend proxy. Mostly repeated `getTokenAccountBalance` calls for the same two accounts (`8KTa1mJHsy6UfswXP8HxQBVzcH4jgRkwh3hHqLDLLUFf`, `3rAWFGFUitzCXCouzU3fdwdYCaCBfSVCX3VYogyGeMc8`) plus `getAccountInfo` and `getMultipleAccounts`, all repeating every ~140-160ms.
+
+**Security (positive):** No API key or secret visible in these headers/payloads — makes sense, since the public devnet RPC requires no auth. No leak here. Sources tab (searching for 'sk_', 'api_key', 'secret', etc. in the JS bundle) not yet checked.
+
+**Performance (technical finding, non-critical):** The pattern is repeated active polling instead of WebSocket subscription (`onAccountChange`/`accountSubscribe` from `@solana/web3.js`). Works fine on devnet under low load, but won't scale — on mainnet, a public RPC would rate-limit quickly at this request volume; even with a dedicated RPC (Helius, likely what the product will use in production), constant polling wastes RPC credits compared to subscriptions.
+
+**Severity:** Low/Info — not a bug, an architecture optimization suggestion.
+
+**TODO:** still need to check the Sources tab (secret search in the bundle) and Application tab (localStorage/cookies) — pending.
+
+---
+
+## FP-APP-11 — Lighthouse baseline (desktop, /buy) — excellent, and Sources tab with no obvious secrets
+
+**Lighthouse scores (desktop, beta.spout.finance/buy, 09/09/2026 8:39 PM GMT-3):**
 - Performance: 100 (FCP 0.2s, LCP 0.6s, TBT 20ms, CLS 0, SI 0.4s)
 - Accessibility: 100
 - Best Practices: 100
-- SEO: 91 (único ponto: documento sem meta description)
+- SEO: 91 (only issue: no meta description)
 - Agentic Browsing: 2/2
 
-**Why this matters:** É um resultado muito acima da média DeFi — a maioria dos protocolos que testei antes (Hobba, Zodial) tinha scores de Performance na faixa de 60-80. Vale citar como "what works" forte no report; poucos concorrentes provavelmente vão rodar esse audit, então é um diferencial de rigor técnico.
+**Why this matters:** A result well above the DeFi average — most protocols tested before (Hobba, Zodial) had Performance scores in the 60-80 range. Worth citing as a strong "what works" point in the report; few competitors will likely run this audit, so it's a technical-rigor differentiator.
 
-**Único ponto de melhoria real:** SEO 91 por falta de `<meta name="description">` — quick win fácil de reportar.
+**One real improvement point:** SEO 91 due to missing `<meta name="description">` — an easy quick win to report.
 
-## FP-APP-14 — Sinalização de devnet vs. dinheiro real não é clara o suficiente na UI
+## FP-APP-14 — Devnet vs. real money signaling isn't clear enough in the UI
 
-**What happened:** Depois de um dia inteiro de teste, surgiu a dúvida genuína "coloquei dinheiro real?" — apesar do toast inicial "Wallet verified for devnet" e da seção "DEVNET TEST FUNDS" no painel de wallet, em nenhum momento subsequente da UI (telas de Trade, Borrow, Portfolio) há um indicador persistente e visível de "você está em modo de teste / devnet" enquanto navega e opera.
+**What happened:** After a full day of testing, the genuine question "did I put in real money?" came up — despite the initial "Wallet verified for devnet" toast and the "DEVNET TEST FUNDS" section in the wallet panel, at no subsequent point in the UI (Trade, Borrow, Portfolio screens) is there a persistent, visible indicator of "you're in test mode/devnet" while navigating and operating.
 
-**Why it caused friction:** Se um desenvolvedor Solana experiente, que literalmente configura infra devnet/mainnet pra viver, teve um momento de "espera, isso é real?", esse é um sinal forte de que o indicador de ambiente é insuficiente pra qualquer usuário menos técnico. O toast de "verified for devnet" aparece uma vez e some — não há badge fixo, cor de tema diferente, ou label persistente (tipo "TESTNET" no header) lembrando o usuário em todas as telas seguintes.
+**Why it caused friction:** If an experienced Solana developer — who literally configures devnet/mainnet infra for a living — had a moment of "wait, is this real?", that's a strong signal that the environment indicator is insufficient for any less technical user. The "verified for devnet" toast appears once and disappears — there's no persistent badge, different theme color, or persistent label (like "TESTNET" in the header) reminding the user across every subsequent screen.
 
-**Severity:** High — isso é sobre confiança e clareza financeira, o núcleo de qualquer produto DeFi. É facilmente resolvível e tem grande impacto de segurança psicológica do usuário.
+**Severity:** High — this is about trust and financial clarity, the core of any DeFi product. Easily fixable, with a large impact on the user's psychological sense of safety.
 
-**Suggested improvement:** Badge persistente no header (ex: "DEVNET" em amarelo/laranja, sempre visível) enquanto o beta estiver rodando em testnet, não só um toast que desaparece. Bandeiras assim são padrão em produtos financeiros de teste (bancos digitais em sandbox, exchanges em modo demo, etc).
+**Suggested improvement:** A persistent header badge (e.g., "DEVNET" in yellow/orange, always visible) while the beta runs on testnet, not just a toast that disappears. This kind of flag is standard in test financial products (sandboxed digital banks, exchange demo modes, etc.).
 
 ---
 
-## FP-APP-12 — Confirmado como achado #1 técnico do report: 500 sistemático em /deposit e /borrow
+## FP-APP-12 — Confirmed as the report's #1 technical finding: systematic 500 on /deposit and /borrow
 
-**What happened:** Na tela de `/borrow`, com a posição de GOOG já ativa, o painel de borrow exibiu a mensagem crua: `CollateralType: unexpected length 213 (expected 165, or 149 pre-migration)`.
+**What happened:** On the `/borrow` screen, with the GOOG position already active, the borrow panel displayed the raw message: `CollateralType: unexpected length 213 (expected 165, or 149 pre-migration)`.
 
-**Why this is the strongest technical finding do report:** Essa não é uma mensagem de erro de UI — é literalmente um erro de **desserialização de struct de conta on-chain** (padrão típico de Anchor/Borsh: o parser espera uma conta com um tamanho de bytes específico — 165 bytes no layout atual, ou 149 bytes no layout "pre-migration" — e recebeu 213 bytes, que não bate com nenhum dos dois). Isso indica um de dois cenários sérios:
-1. **Migração de schema incompleta**: o programa foi atualizado (migração de layout de conta) mas existem contas antigas/novas com tamanhos inconsistentes sendo lidas pelo mesmo parser, e o "graceful fallback" pro layout pre-migration (149 bytes) não cobre esse caso (213 bytes).
-2. **Erro não tratado vazando pro cliente**: mesmo que seja um caso conhecido/esperado no backend, deixar essa string de erro interna (que expõe detalhes de implementação do programa: nomes de campos como `CollateralType`, tamanhos exatos de struct) diretamente na interface é uma prática ruim de error handling — dá info de debug pra qualquer atacante mapeando a estrutura de contas do programa, e assusta/confunde o usuário final que não faz ideia do que isso significa.
+**Why this is the report's strongest technical finding:** This isn't a UI error message — it's literally an **on-chain account struct deserialization error** (a classic Anchor/Borsh pattern: the parser expects an account with a specific byte size — 165 bytes in the current layout, or 149 in the "pre-migration" layout — and received 213 bytes, matching neither). This suggests one of two serious scenarios:
+1. **Incomplete schema migration**: the program was updated (account layout migration), but old/new accounts with inconsistent sizes are being read by the same parser, and the "graceful fallback" to the pre-migration layout (149 bytes) doesn't cover this case (213 bytes).
+2. **Unhandled error leaking to the client**: even if this is a known/expected backend case, exposing this internal error string (which reveals program implementation details: field names like `CollateralType`, exact struct sizes) directly in the interface is bad error-handling practice — it gives debugging info to any attacker mapping the program's account structure, and scares/confuses the end user who has no idea what it means.
 
-**Severity:** Critical — tanto pelo ângulo funcional (o fluxo de borrow pode estar quebrado pra essa conta/colateral específica) quanto pelo ângulo de segurança (vazamento de detalhes de implementação interna, característico do tipo de achado que se busca em auditoria — está diretamente alinhado com "SVS-8" e outros trabalhos anteriores de review de contas Anchor).
+**Severity:** Critical — both from a functional angle (the borrow flow may be broken for this specific account/collateral) and a security angle (leaking internal implementation details, the kind of finding sought in an audit — directly aligned with "SVS-8" and other prior Anchor account review work).
 
-**Suggested improvement:** (1) Tratar esse erro no client com uma mensagem humana ("Não foi possível carregar sua posição de colateral — tente novamente ou contate o suporte"), nunca expor a string de erro do parser. (2) No backend/programa, investigar por que essa conta específica (a de colateral GOOG desse usuário, criada nas últimas 24h) está vindo com 213 bytes — se for uma conta recém-criada, não deveria ter esse problema de migração de schema antigo.
+**Suggested improvement:** (1) Handle this error client-side with a human message ("Could not load your collateral position — try again or contact support"), never expose the parser's raw error string. (2) On the backend/program side, investigate why this specific account (this user's GOOG collateral account, created in the last 24h) is coming back with 213 bytes — if it's a newly created account, it shouldn't have this old-schema migration issue.
 
-**CAUSA RAIZ CONFIRMADA (Console, screenshot 17):** duas chamadas de API falharam com **status 500**:
+**ROOT CAUSE CONFIRMED (Console, screenshot 17):** two API calls failed with **status 500**:
 - `api/vault/deposit?us...YoRnNV&ticker=XOM:1`
 - `api/vault/borrow?use...YoRnNV&ticker=XOM:1`
 
-Ambas pro parâmetro `ticker=XOM` — o mesmo ativo errado identificado no FP-APP-13 (o painel abre defaultado pra XOM, ativo que o usuário não possui nenhuma posição). Isso conecta os dois achados numa única causa raiz: **o frontend tenta pré-carregar dados de vault (deposit/borrow) pro ticker default (XOM) antes mesmo do usuário selecionar um ativo; como não existe posição/vault pra esse par usuário+XOM, o endpoint retorna 500; e o client, ao tentar processar essa resposta de erro como se fosse dados de conta, gera o erro de desserialização cru que vaza na tela ("CollateralType: unexpected length...").**
+Both for the `ticker=XOM` parameter — the same wrong asset identified in FP-APP-13 (the panel opens defaulted to XOM, an asset the user holds no position in). This connects both findings to a single root cause: **the frontend tries to preload vault data (deposit/borrow) for the default ticker (XOM) before the user even selects an asset; since no position/vault exists for that user+XOM pair, the endpoint returns 500; and the client, while trying to process this error response as if it were account data, generates the raw deserialization error that leaks onto the screen ("CollateralType: unexpected length...").**
 
-Essa é uma explicação MUITO mais simples e menos alarmante do que a hipótese original de "migração de schema quebrada" — não é um bug de layout de conta on-chain, é um erro de **tratamento de resposta de erro HTTP** no client: um 500 (provavelmente "vault not found" mal categorizado como erro de servidor em vez de 404) sendo processado como se fosse um payload válido de conta.
+This is a MUCH simpler and less alarming explanation than the original "broken schema migration" hypothesis — it's not an on-chain account layout bug, it's an HTTP error-handling error on the client: a 500 (probably a "vault not found" case wrongly categorized as a server error instead of a 404) being processed as if it were a valid account payload.
 
-**Severity revisada:** ainda High (não mais "Critical técnico de blockchain", mas continua sendo um bug real de error handling que vaza detalhes internos e pode confundir/assustar usuários), rebaixado de "possível corrupção de dados on-chain" pra "erro de UX de tratamento de erro HTTP + endpoint retornando código de status errado (500 em vez de 404 pra 'vault não existe')".
+**Revised severity:** still High (no longer "Critical blockchain-level technical bug," but still a real error-handling bug that leaks internal details and can confuse/scare users), downgraded from "possible on-chain data corruption" to "HTTP error-handling UX bug + endpoint returning the wrong status code (500 instead of 404 for 'vault doesn't exist')."
 
-**Suggested improvement:** (1) Backend: retornar 404 (não 500) quando o vault não existe pra aquele ticker/usuário — 500 implica erro do servidor, não "recurso não encontrado", que é semanticamente diferente e mais barato de tratar no client. (2) Frontend: nunca inicializar o painel de borrow com uma chamada de API pra um ticker que o usuário não possui — carregar vazio/neutro até o usuário selecionar um ativo real (resolve isso e o FP-APP-13 ao mesmo tempo). (3) Nunca deixar uma exception de parsing vazar como texto cru na UI — sempre ter um fallback humano.
+**Suggested improvement:** (1) Backend: return 404 (not 500) when the vault doesn't exist for that ticker/user — 500 implies a server error, not "resource not found," which is semantically different and cheaper to handle client-side. (2) Frontend: never initialize the borrow panel with an API call for a ticker the user doesn't own — load empty/neutral until the user selects a real asset (fixes this and FP-APP-13 at the same time). (3) Never let a parsing exception leak as raw text into the UI — always have a human fallback.
 
-**ATUALIZAÇÃO CRÍTICA — não é específico do ticker errado (screenshot 18):** com GOOG corretamente selecionado (o ativo que o usuário de fato possui), os MESMOS endpoints continuam retornando 500: `borrow?userAddress=DHG4p1...&ticker=G...` e `deposit?userAddress=DHG4p1...&ticker=G...`. Ou seja, o problema é sistemático nesses dois endpoints, não específico do default errado (XOM) — isso descarta a hipótese anterior de "causa raiz simples" e reabre a questão.
+**CRITICAL UPDATE — not specific to the wrong ticker (screenshot 18):** with GOOG correctly selected (the asset the user actually owns), the SAME endpoints keep returning 500: `borrow?userAddress=DHG4p1...&ticker=G...` and `deposit?userAddress=DHG4p1...&ticker=G...`. So the problem is systematic in these two endpoints, not specific to the wrong default (XOM) — this rules out the earlier "simple root cause" hypothesis and reopens the question.
 
-**Efeito colateral grave observado agora:** apesar do 500 persistente, a maior parte do painel funciona corretamente com dados computados localmente/client-side — Health Factor 6.23 (verde, saudável), holdings "0.009170935 GOOG / $3" corretos, LTV slider funcional. MAS um banner de aviso apareceu no topo: **"Borrowing $0.48 exceeds the $0.00 this position supports."** — uma mensagem que contradiz diretamente o resto da tela (Health Factor saudável, Max Borrow de $1.50 confirmado ontem no Portfolio). A hipótese mais provável: esse aviso específico É alimentado pela resposta (falha) desses endpoints 500 — quando a chamada de capacidade de borrow falha, o client parece "fail closed" tratando a capacidade como $0.00, só que gera um alerta incorreto e alarmante em vez de simplesmente não bloquear ou usar o valor já calculado localmente (que está certo, como prova o Health Factor).
+**Serious side effect observed now:** despite the persistent 500, most of the panel works correctly with locally/client-side computed data — Health Factor 6.23 (green, healthy), correct "0.009170935 GOOG / $3" holdings, functional LTV slider. BUT a warning banner appeared at the top: **"Borrowing $0.48 exceeds the $0.00 this position supports."** — a message directly contradicting the rest of the screen (healthy Health Factor, $1.50 Max Borrow confirmed yesterday in the Portfolio). The most likely hypothesis: this specific warning IS fed by the (failed) response of these 500 endpoints — when the borrow-capacity call fails, the client seems to "fail closed," treating capacity as $0.00, but generates an incorrect and alarming alert instead of simply not blocking or using the already-correct locally computed value (proven correct by the Health Factor).
 
-**Severity:** Critical (reforçado) — é uma falha real e reproduzível de dois endpoints centrais (`/deposit`, `/borrow`) do fluxo mais importante do produto, com efeito direto e visível na UI (aviso incorreto e alarmante que pode fazer um usuário desistir de uma operação legítima e segura).
+**Severity:** Critical (reinforced) — a real, reproducible failure of two central endpoints (`/deposit`, `/borrow`) in the product's most important flow, with a direct, visible UI effect (an incorrect, alarming warning that could make a user abandon a legitimate, safe operation).
 
-**Reprodução confirmada em múltiplos valores:** o mesmo aviso incorreto apareceu tanto pra $0.08 quanto pra $0.48 de tentativa de borrow — confirma que não é um caso de borda ligado a um valor específico, é o estado de falha dos endpoints (`/deposit`, `/borrow` retornando 500) se propagando pra qualquer tentativa de borrow, independente do amount. Reforça ainda mais que é um bug sistemático no fluxo, não um edge case isolado.
+**Reproduction confirmed across multiple amounts:** the same incorrect warning appeared for both a $0.08 and a $0.48 borrow attempt — confirms this isn't an edge case tied to a specific value, it's the endpoint failure state (`/deposit`, `/borrow` returning 500) propagating to any borrow attempt, regardless of amount. Further reinforces that this is a systematic flow bug, not an isolated edge case.
 
-**CONFIRMAÇÃO FINAL:** com GOOG corretamente selecionado (não mais XOM por engano), Health Factor mostra "1.00 / 37.40" (saudável) e "Est. borrower cost/yr: $0.00" — mas o erro cru **"CollateralType: unexpected length 213 (expected 165, or 149 pre-migration)"** continua aparecendo, junto com "You receive $0.08" e o botão "Borrow $0.08 USDC" ativo. Isso prova definitivamente que o erro não depende do ticker selecionado (não é о bug do default XOM) — é uma falha real e persistente na camada de desserialização de conta, coexistindo com os 500s nos endpoints `/api/vault/deposit` e `/api/vault/borrow`. A causa mais provável agora: a conta de colateral do usuário tem 213 bytes, e nem o layout atual (165) nem o legado (149 pre-migration) batem — sugere um terceiro formato de conta não coberto pelo parser atual, possivelmente introduzido por uma feature mais recente (como o próprio Leverage) que não foi migrada corretamente nesse endpoint específico.
-
----
-
-## FP-APP-13 — Painel de borrow abre com ativo errado por padrão ("Borrow against XOM" sem eu possuir XOM)
-
-**What happened:** Ao entrar em `/borrow` com uma posição ativa apenas em GOOG (Position Value $2.99, Max. Borrow $1.50 — visíveis corretamente na tabela), o painel de ação à direita abriu pré-selecionado como "Borrow against **XOM**" — ativo que o usuário não possui nenhuma posição (linha mostra $0.00 / 0 shares). O painel também mostra "Health Factor: 1.00 / ∞" e "Borrow $0.00 USDC" nesse estado, que fazem sentido pra um colateral vazio, mas o ativo errado sendo pré-selecionado é confuso — o usuário logicamente esperaria que o painel abrisse já mostrando o ativo que ele de fato possui (GOOG), ou pelo menos um estado neutro/vazio, não um ativo aleatório sem posição.
-
-**Severity:** Medium — não bloqueia o fluxo (dá pra clicar na linha do GOOG pra corrigir, presumivelmente), mas é uma primeira impressão confusa logo na entrada da tela mais importante do produto (borrow é o core value prop).
-
-**TODO:** clicar na linha do GOOG na tabela e confirmar se o painel muda corretamente pra "Borrow against GOOG" com os valores certos.
+**FINAL CONFIRMATION:** with GOOG correctly selected (no longer XOM by mistake), Health Factor shows "1.00 / 37.40" (healthy) and "Est. borrower cost/yr: $0.00" — but the raw error **"CollateralType: unexpected length 213 (expected 165, or 149 pre-migration)"** still appears, alongside "You receive $0.08" and an active "Borrow $0.08 USDC" button. This definitively proves the error doesn't depend on the selected ticker (it's not the XOM-default bug) — it's a real, persistent failure in the account deserialization layer, coexisting with the 500s on the `/api/vault/deposit` and `/api/vault/borrow` endpoints. The most likely cause now: the user's collateral account has 213 bytes, and neither the current layout (165) nor the legacy one (149 pre-migration) match — suggesting a third account format not covered by the current parser, possibly introduced by a more recent feature (like Leverage itself) that wasn't correctly migrated for this specific endpoint.
 
 ---
 
-## Seção 8 — Senior Analysis (rascunho, pra refinar antes da submissão final)
+## FP-APP-13 — Borrow panel opens on the wrong default asset ("Borrow against XOM" without owning XOM)
 
-*O que tornaria o Spout imbatível — pontos estruturais que vão além dos findings individuais.*
+**What happened:** Entering `/borrow` with an active position only in GOOG (Position Value $2.99, Max. Borrow $1.50 — correctly shown in the table), the action panel on the right opened pre-selected as "Borrow against **XOM**" — an asset the user holds no position in (row shows $0.00 / 0 shares). The panel also shows "Health Factor: 1.00 / ∞" and "Borrow $0.00 USDC" in this state, which make sense for empty collateral, but the wrong asset being pre-selected is confusing — the user would logically expect the panel to open already showing the asset they actually own (GOOG), or at least a neutral/empty state, not a random asset with no position.
 
-**1. O funil de conversão quebra antes do usuário sequer decidir comprar.**
-Não é um FP isolado — é um padrão. O banner "0% Interest. Always." contradiz a coluna "Borrow Cost" na mesma tela (FP-APP-1), e o Phantom bloqueia fisicamente a transação com "pode ser maliciosa" (FP-APP-5). Um usuário novo bate nesses dois sinais de alerta *antes* de qualquer decisão informada sobre o produto em si. Corrigir bugs de UX interna não resolve nada se o funil já quebrou na porta de entrada.
+**Severity:** Medium — doesn't block the flow (clicking the GOOG row presumably fixes it), but it's a confusing first impression right at the entry point of the product's most important screen (borrow is the core value prop).
 
-**2. O produto trata "erro de infraestrutura" e "erro de negócio" como a mesma coisa.**
-O erro cru de desserialização de conta (FP-APP-12) e o aviso incorreto de "$0.00 de capacidade" nasceram do mesmo lugar: quando uma chamada de API falha (500), o client não distingue "não consegui buscar o dado" de "você não tem capacidade". Isso é sintoma de uma camada de error handling que não foi desenhada pensando em UX — só em happy path. Em fintech, estado de erro mal comunicado é uma falha de produto, não só de polish.
-
-**3. O ambiente de teste (devnet) não se anuncia — e isso é um problema de confiança, não só de rótulo.**
-FP-APP-14 não é sobre "esqueceram de colocar um badge". É sobre o fato de que um produto financeiro que lida com risco de capital real (no futuro, mainnet) treina o usuário, desde o beta, a não prestar atenção em qual rede está operando. Hábito formado agora é hábito carregado pro lançamento.
-
-**4. A documentação e o produto contam duas histórias diferentes do mesmo mecanismo.**
-Vimos isso repetidamente: yield alvo (7% vs 9%), liquidation fee (5% flat vs 8.8% no exemplo), "no losing your upside" vs o mecanismo real de assignment. Isoladamente cada um parece um typo. Juntos, formam um padrão: a camada de marketing/docs foi escrita antes (ou separadamente) da implementação final, e ninguém reconciliou as duas depois. Isso é resolvível com um processo, não com um dev fixando cada instância.
-
-**5. O risco estrutural mais interessante do produto (RWA + mercado fechado) é o menos comunicado.**
-Nada no produto avisa o que acontece com o Health Factor de um usuário se o preço de uma ação cair 15% num gap de abertura de segunda-feira, com o oracle rodando em frequência reduzida no fim de semana (achado da varredura de docs, `/oracles`). Esse é o risco mais nativo e diferenciador do Spout em relação a DeFi puro-cripto — e é justamente o que está menos explicado tanto nos docs quanto na UI.
-
-**6. O produto ainda não decidiu se é "DeFi-native" ou "fintech regulada" na forma como comunica risco.**
-Mistura linguagem de "0% interest, no margin calls" (tom fintech tradicional, tranquilizador) com mecânica real de covered calls e assignment (risco real, tipo opções). Protocolos DeFi-native maduros (Kamino, MarginFi) tendem a expor a mecânica de risco de forma mais crua e assumida — o usuário sabe que está em DeFi. O Spout tenta suavizar com linguagem fintech um produto que estruturalmente ainda carrega risco de derivativo.
-
-**TODO:** validar ponto 6 com uma comparação direta (feature-by-feature) contra Kamino ou MarginFi antes de finalizar — ainda não fizemos essa comparação.
+**TODO:** click the GOOG row in the table and confirm the panel correctly switches to "Borrow against GOOG" with the right values.
 
 ---
 
-## Seção 6 — One-Sentence Test
+## Section 8 — Senior Analysis (draft, to refine before final submission)
 
-*"Spout Finance deixa você tomar emprestado stablecoins a 0% de juros usando ações tokenizadas como colateral — financiado por covered calls sobre os mesmos ativos — mas ainda comunica risco de liquidação e leverage como se fosse fintech tradicional, não como o produto de derivativo que estruturalmente é."*
+*What would make Spout unbeatable — structural points beyond individual findings.*
+
+**1. The conversion funnel breaks before the user even decides to buy.**
+Not an isolated FP — it's a pattern. The "0% Interest. Always." banner contradicts the "Borrow Cost" column on the same screen (FP-APP-1), and Phantom physically blocks the transaction with "may be malicious" (FP-APP-5). A new user hits both warning signs *before* any informed decision about the product itself. Fixing internal UX bugs doesn't matter if the funnel already broke at the front door.
+
+**2. The product treats "infrastructure error" and "business error" as the same thing.**
+The raw account deserialization error (FP-APP-12) and the incorrect "$0.00 capacity" warning were both born from the same place: when an API call fails (500), the client doesn't distinguish "I couldn't fetch the data" from "you don't have capacity." This is symptomatic of an error-handling layer not designed with UX in mind — only the happy path. In fintech, a poorly communicated error state is a product failure, not just polish.
+
+**3. The test environment (devnet) doesn't announce itself — a trust problem, not just a labeling one.**
+FP-APP-14 isn't about "forgot to add a badge." It's about the fact that a financial product that will eventually handle real capital risk trains the user, from beta onward, not to pay attention to which network they're operating on. A habit formed now is a habit carried into launch.
+
+**4. Documentation and the product tell two different stories about the same mechanism.**
+We saw this repeatedly: target yield (7% vs 9%), liquidation fee (5% flat vs 8.8% in the example), "no losing your upside" vs the real assignment mechanic. Individually each looks like a typo. Together, they form a pattern: the marketing/docs layer was written before (or separately from) the final implementation, and nobody reconciled the two afterward. This is solvable with a process, not by a dev fixing each instance.
+
+**5. The product's most interesting structural risk (RWA + closed market) is its least communicated one.**
+Nothing in the product warns what happens to a user's Health Factor if a stock's price drops 15% on a Monday-morning gap, with the oracle running at reduced frequency over the weekend (finding from the docs sweep, `/oracles`). This is the most native and differentiating risk of Spout compared to pure-crypto DeFi — and it's precisely the least explained, both in the docs and the UI.
+
+**6. The product hasn't decided whether it's "DeFi-native" or "regulated fintech" in how it communicates risk.**
+It mixes "0% interest, no margin calls" language (reassuring, traditional fintech tone) with the real mechanics of covered calls and assignment (real, options-like risk). Mature DeFi-native protocols (Kamino, MarginFi) tend to expose risk mechanics more rawly and assumedly — the user knows they're in DeFi. Spout tries to soften, with fintech language, a product that structurally still carries derivative risk.
+
+**TODO:** validate point 6 with a direct (feature-by-feature) comparison against Kamino or MarginFi before finalizing — haven't done that comparison yet.
 
 ---
 
-## FP-APP-4/6 — ESCALADO: FAQ público (schema.org) afirma KYC obrigatório, contradizendo diretamente a ausência observada
+## Section 6 — One-Sentence Test
 
-**What happened:** Inspecionando o HTML fonte de `spout.finance` (o conteúdo SSR/fallback servido antes da hidratação React — o que Google, crawlers e leitores de tela realmente indexam), há um bloco `FAQPage` em JSON-LD com respostas públicas e estruturadas. Duas delas são explícitas sobre compliance:
+*"Spout Finance lets you borrow stablecoins at 0% interest using tokenized stocks as collateral — funded by covered calls on those same assets — but still communicates liquidation and leverage risk as if it were traditional fintech, not the derivatives product it structurally is."*
+
+---
+
+## FP-APP-4/6 — ESCALATED: public FAQ (schema.org) claims mandatory KYC, directly contradicting the observed absence
+
+**What happened:** Inspecting the source HTML of `spout.finance` (the SSR/fallback content served before React hydration — what Google, crawlers, and screen readers actually index), there's a `FAQPage` block in JSON-LD with public, structured answers. Two of them are explicit about compliance:
 
 - *"How do I get started?"* → **"Connect a supported Solana wallet, complete a one-time KYC verification, and you can deposit equities..."**
 - *"Is Spout compliant with US regulations?"* → **"Spout uses a regulated US broker-dealer for custody and options execution, enforces wallet-level KYC on all tokenized asset holders, and is structured to comply with applicable US securities laws."**
 
-Isso é uma claim pública, indexável, estruturada especificamente para SEO/AI crawlers — não é um texto qualquer de marketing, é dado que o Google e assistentes de IA vão citar como fato sobre o produto.
+This is a public, indexable claim, specifically structured for SEO/AI crawlers — not just any marketing text, it's data that Google and AI assistants will cite as fact about the product.
 
-**Por que isso eleva a severidade:** Anteriormente (FP-APP-4/6) tratamos a ausência de KYC como possivelmente aceitável — "é devnet, faz sentido pular verificação". Mas essa nova evidência muda o enquadramento: o site **afirma publicamente e estruturadamente** que KYC é enforced "wallet-level" em "all tokenized asset holders", sem nenhuma ressalva de "exceto no beta/devnet". Um usuário, auditor, ou parceiro institucional que ler essa FAQ (ou uma IA que a cite) forma uma crença factualmente incorreta sobre o estado atual do produto. Isso é diferente de "UX confusa" — é uma claim de compliance regulatório não verificável no produto real, o tipo de coisa que auditores de segurança/compliance marcam como Critical.
+**Why this raises the severity:** Previously (FP-APP-4/6) we treated the absence of KYC as possibly acceptable — "it's devnet, makes sense to skip verification." But this new evidence changes the framing: the site **publicly and structurally claims** that KYC is enforced "wallet-level" on "all tokenized asset holders," with no caveat for "except in beta/devnet." A user, auditor, or institutional partner reading this FAQ (or an AI citing it) forms a factually incorrect belief about the product's current state. This is different from "confusing UX" — it's a regulatory compliance claim not verifiable on the real product, the kind of thing security/compliance auditors flag as Critical.
 
-**Severity:** **Critical** (upgrade de Medium/High) — claim pública e estruturada de compliance regulatório (KYC "enforced... on all tokenized asset holders") não observável no fluxo real testado, em qualquer ambiente (nem sequer um aviso de "KYC required in production, skipped in beta" aparece).
+**Severity:** **Critical** (upgrade from Medium/High) — a public, structured regulatory compliance claim (KYC "enforced... on all tokenized asset holders") not observable in the real tested flow, in any environment (not even a "KYC required in production, skipped in beta" notice appears).
 
-**Suggested improvement:** Ou (a) implementar o gate de KYC mesmo em beta/devnet — pelo menos como fluxo simulado, pra validar que o enforcement funciona antes do mainnet, ou (b) adicionar uma ressalva explícita na FAQ pública: "KYC enforcement is active on mainnet; the current beta on devnet does not require it." Deixar a claim pública sem ressalva, enquanto o produto real não cumpre, é o tipo de gap que pode virar problema regulatório real, não só de UX.
-
----
-
-## Nota — confirmações cruzadas úteis (HTML fonte)
-
-- **Fee split lender/protocol confirmado:** FAQ pública diz "distributes 80% of the collected premium to lenders" — bate exatamente com os 20% de protocol fee already documentados em `/fee-structure` (100% - 20% = 80%). **Consistência real, sem contradição** — bom sinal, vale citar como "what works" (números batendo entre fontes diferentes).
-- **Custo médio do borrower quantificado:** a FAQ diz "Historically this cost averages around 0.5% annualized across the portfolio" para o risco de assignment do borrower — isso pode ser a explicação real por trás do "Borrow Cost" da tabela de Trade (FP-APP-1/5), já que os valores observados (0.54%, 0.86%, 1.12%, 0.41%, 1.35%) giram em torno dessa média. Ainda não está explicado dentro do app via tooltip, mas o dado público existe — reforça a recomendação de trazer essa explicação pra dentro do produto, não só pra FAQ externa.
-- **Inconsistência menor:** a FAQ pública promete "double-digit APY across 11 assets" pros lenders, mas a Senior tranche documentada é ~9% (não é double-digit). Só a Junior (~32%) cumpre a promessa. Achado Low — vale mencionar en passant.
-- **200% de colateralização** mencionado na FAQ é consistente com LTV de 50% (50% LTV = 2x colateral = 200%) — apenas outra forma de expressar o mesmo número, não é inconsistência.
+**Suggested improvement:** Either (a) implement the KYC gate even in beta/devnet — at least a simulated flow, to validate enforcement before mainnet — or (b) add an explicit caveat to the public FAQ: "KYC enforcement is active on mainnet; the current beta on devnet does not require it." Leaving the public claim uncaveated while the real product doesn't comply is the kind of gap that can become a real regulatory problem, not just a UX one.
 
 ---
 
-**FP-LANDING-1 — Flash de "2% Interest" durante carregamento antes de estabilizar em "0% Interest"**
+## Note — useful cross-confirmations (source HTML)
 
-**What happened:** Ao carregar a landing page, a seção "The Cost of Borrowing" exibe brevemente **"2% Interest — What the ultra-wealthy pay"** antes de estabilizar no valor final correto: **"0% Interest — What you pay with Spout"** (confirmado pelo usuário — o valor certo aparece, só havia um estado intermediário capturado no screenshot 19). Provavelmente é um contador animado (count-up/count-down) ou um placeholder de hidratação que renderiza um valor transitório antes do valor real assentar.
-
-**Why it caused friction:** Mesmo sendo transitório, um flash de conteúdo incorreto na hero section — exatamente a claim central do produto — é um risco real: (1) qualquer print/screen-recording tirado nesse instante captura a versão errada (como aconteceu aqui), (2) para conexões lentas ou dispositivos mais fracos, esse estado intermediário pode durar tempo suficiente pra ser lido como afirmação real, (3) é o tipo de "flash of incorrect content" que ferramentas de acessibilidade e leitores de tela podem capturar literalmente antes da correção.
-
-**Severity:** Medium — não é um bug de dado errado permanente (o valor final está correto: "0% Interest — What you pay with Spout"), mas é uma falha de polish em um lugar de alta visibilidade, com risco real de captura equivocada (como este próprio caso demonstra).
-
-**Suggested improvement:** Se for um contador animado, iniciar a contagem a partir de um valor neutro (ex: "—%") em vez de mostrar "2%" como frame intermediário, ou aplicar um fade-in em vez de contagem visível. Se for estado de hidratação, garantir que o valor inicial no SSR já seja o correto (0%) antes do JS assumir.
+- **Lender/protocol fee split confirmed:** the public FAQ says "distributes 80% of the collected premium to lenders" — matches exactly the 20% protocol fee already documented in `/fee-structure` (100% - 20% = 80%). **Real consistency, no contradiction** — good sign, worth citing as "what works" (numbers matching across different sources).
+- **Quantified average borrower cost:** the FAQ says "Historically this cost averages around 0.5% annualized across the portfolio" for the borrower's assignment risk — this could be the real explanation behind the Trade table's "Borrow Cost" (FP-APP-1/5), since the observed values (0.54%, 0.86%, 1.12%, 0.41%, 1.35%) hover around that average. Still not explained inside the app via a tooltip, but the public data exists — reinforces the recommendation to bring this explanation into the product, not just the external FAQ.
+- **Minor inconsistency:** the public FAQ promises "double-digit APY across 11 assets" for lenders, but the documented Senior tranche is ~9% (not double-digit). Only the Junior (~32%) fulfills that promise. Low-severity finding — worth mentioning in passing.
+- **200% collateralization** mentioned in the FAQ is consistent with a 50% LTV (50% LTV = 2x collateral = 200%) — just another way of expressing the same number, not an inconsistency.
 
 ---
 
-**Findings totais: 26** (5 de documentação + 1 de landing page + 1 de mobile + 19 de app), divididos por severidade:
-- **Critical: 8** — FP-APP-16 (venda marcada "Failed" mas executada de verdade — o mais grave do report), FP-MOBILE-1 (site não renderiza em mobile/Slow 4G), FP-APP-5 (bloqueio total no Phantom, buy e sell), FP-APP-12 (erro de desserialização + 500s sistemáticos), FP-APP-15 (Avg Cost/P&L errado no AAPL), FP-DOC-2 (liquidation fee inconsistente), FP-APP-4/6 (KYC publicamente prometido, ausente na prática), FP-APP-13/9 relacionados
-- **High: 5** — FP-APP-1 (Borrow Cost vs "0% Always"), FP-APP-14 (devnet não sinalizado), FP-DOC-1 (yield inconsistente), FP-DOC-3 ("no losing upside" vs assignment)
-- **Medium: 6** — FP-APP-13 (painel abre com ativo errado), FP-DOC-4/5 (LP reserve, circuit breaker sem threshold), FP-APP-7 (status "Executing" incorreto), FP-LANDING-1 (flash de "2%" no carregamento da hero)
-- **Low: 4** — FP-APP-8 (arredondamento de shares, resolvido), FP-APP-10/11 (polling ineficiente, SEO)
+**FP-LANDING-1 — "2% Interest" flash during load before settling on "0% Interest"**
 
-**A tese central em 2 frases:** o produto tem um modelo financeiro genuinamente diferenciado (RWA como colateral, yield via covered calls) e uma engenharia de backend com pelo menos um bug real e sério (desserialização de conta), mas a camada de comunicação — marketing, docs, mensagens de erro — não foi reconciliada com a implementação em nenhum desses três lugares. O resultado é um produto que assusta usuários no primeiro contato (Phantom) e depois os confunde no meio do fluxo (mensagens contraditórias), mesmo quando o mecanismo subjacente funciona corretamente.
+**What happened:** While the landing page loads, the "The Cost of Borrowing" section briefly displays **"2% Interest — What the ultra-wealthy pay"** before settling on the correct final value: **"0% Interest — What you pay with Spout"** (confirmed by the user — the correct value does appear, there was just an intermediate state captured in screenshot 19). Likely an animated counter (count-up/count-down) or a hydration placeholder rendering a transient value before the real one settles.
 
-**As 3 correções que moveriam o ponteiro imediatamente:**
-1. Resolver o flag de segurança do Phantom (contato direto com Phantom/Blowfish para allowlist) — é a barreira de conversão mais alta e mais barata de remover
-2. Corrigir os endpoints `/api/vault/deposit` e `/api/vault/borrow` que retornam 500 (achado técnico #1) — afeta a confiabilidade percebida do core feature
-3. Auditoria de reconciliação entre docs/marketing e a UI real (yield, liquidation fee, "no losing upside") — um passe de revisão resolveria 3-4 findings de uma vez
+**Why it caused friction:** Even being transient, a flash of incorrect content on the hero section — exactly the product's central claim — is a real risk: (1) any screenshot/screen-recording taken at that instant captures the wrong version (as happened here), (2) on slow connections or weaker devices, this intermediate state could last long enough to be read as a real claim, (3) it's the kind of "flash of incorrect content" that accessibility tools and screen readers can literally capture before the correction.
+
+**Severity:** Medium — not a permanently wrong data bug (the final value is correct: "0% Interest — What you pay with Spout"), but a polish failure in a high-visibility spot, with a real risk of miscapture (as this very case demonstrates).
+
+**Suggested improvement:** If it's an animated counter, start the count from a neutral value (e.g., "—%") instead of showing "2%" as an intermediate frame, or use a fade-in instead of a visible count. If it's a hydration state, ensure the initial SSR value is already correct (0%) before JS takes over.
 
 ---
 
-*Kamino escolhido como referência por ser o maior money market da Solana, estruturalmente similar (peer-to-pool, LTV + liquidation threshold + oracle-based), mas puro-cripto — o que evidencia onde o modelo RWA do Spout diverge.*
+**Total findings: 26** (5 documentation + 1 landing page + 1 mobile + 19 app), broken down by severity:
+- **Critical: 8** — FP-APP-16 (sell marked "Failed" but actually executed — the most severe in the report), FP-MOBILE-1 (site doesn't render on mobile/Slow 4G), FP-APP-5 (total Phantom block, buy and sell), FP-APP-12 (deserialization error + systematic 500s), FP-APP-15 (wrong Avg Cost/P&L for AAPL), FP-DOC-2 (inconsistent liquidation fee), FP-APP-4/6 (publicly promised KYC, absent in practice), related FP-APP-13/9
+- **High: 5** — FP-APP-1 (Borrow Cost vs "0% Always"), FP-APP-14 (devnet not flagged), FP-DOC-1 (inconsistent yield), FP-DOC-3 ("no losing upside" vs assignment)
+- **Medium: 6** — FP-APP-13 (panel opens on wrong asset), FP-DOC-4/5 (LP reserve, circuit breaker with no threshold), FP-APP-7 (incorrect "Executing" status), FP-LANDING-1 ("2%" flash during hero load)
+- **Low: 4** — FP-APP-8 (share rounding, resolved), FP-APP-10/11 (inefficient polling, SEO)
 
-| Dimensão | Spout | Kamino Lend |
+**The core thesis in 2 sentences:** the product has a genuinely differentiated financial model (RWA as collateral, yield via covered calls) and a backend with at least one real, serious bug (account deserialization), but the communication layer — marketing, docs, error messages — has not been reconciled with the implementation in any of those three places. The result is a product that scares users on first contact (Phantom) and then confuses them mid-flow (contradictory messages), even when the underlying mechanism works correctly.
+
+**The 3 fixes that would move the needle immediately:**
+1. Resolve the Phantom security flag (direct outreach to Phantom/Blowfish for allowlisting) — the highest, cheapest-to-remove conversion barrier
+2. Fix the `/api/vault/deposit` and `/api/vault/borrow` endpoints returning 500 (technical finding #1) — affects the perceived reliability of the core feature
+3. Reconciliation audit between docs/marketing and the real UI (yield, liquidation fee, "no losing upside") — a single review pass would resolve 3-4 findings at once
+
+---
+
+*Kamino chosen as the reference because it's Solana's largest money market, structurally similar (peer-to-pool, LTV + liquidation threshold + oracle-based), but purely crypto-native — highlighting where Spout's RWA model diverges.*
+
+| Dimension | Spout | Kamino Lend |
 |---|---|---|
-| **LTV máximo** | 50% flat, mesmo para todos os ativos | 70-80% típico, varia por ativo (blue-chip maior) |
-| **Liquidation penalty** | Documentado como 5% flat, mas exemplo prático mostra 8.8% (ver FP-DOC-2) — **inconsistência não presente no Kamino** | 2-10%, **explicitamente variável e documentado como tal**: começa em 2% pra liquidadores rápidos, sobe até 10% conforme o LTV piora |
-| **Tipo de liquidação** | Não documentado se é total ou parcial | **Soft liquidation**: fecha só a fração necessária da dívida (ex: 20%), suavizando o impacto pro borrower |
-| **Interest rate model** | 0% fixo pro borrower, financiado externamente via covered calls | Flutuante, curva de utilização (kink) — modelo DeFi-native clássico, sem subsídio externo |
-| **Fontes de oracle** | 1 oracle, frequência reduzida fora do horário de mercado dos EUA (ver `/oracles`) | **Pyth + Switchboard cross-referenciados**, redundância explícita |
-| **Transparência de risco de liquidação** | Fee real depende do ativo mas isso não é comunicado antecipadamente ao usuário | Kamino documenta o range completo (2-10%) e a lógica de como o penalty sobe, publicamente, antes do usuário nem entrar na posição |
+| **Max LTV** | 50% flat, same for all assets | 70-80% typical, varies by asset (higher for blue-chip) |
+| **Liquidation penalty** | Documented as 5% flat, but the worked example shows 8.8% (see FP-DOC-2) — **inconsistency not present at Kamino** | 2-10%, **explicitly variable and documented as such**: starts at 2% for fast liquidators, rises to 10% as LTV worsens |
+| **Liquidation type** | Not documented whether total or partial | **Soft liquidation**: closes only the necessary fraction of the debt (e.g., 20%), softening the impact for the borrower |
+| **Interest rate model** | Fixed 0% for the borrower, externally subsidized via covered calls | Floating, utilization curve (kink) — classic DeFi-native model, no external subsidy |
+| **Oracle sources** | 1 oracle, reduced frequency outside US market hours (see `/oracles`) | **Pyth + Switchboard cross-referenced**, explicit redundancy |
+| **Liquidation risk transparency** | Real fee depends on the asset but isn't communicated upfront to the user | Kamino documents the full range (2-10%) and the logic of how the penalty rises, publicly, before the user even enters the position |
 
-**O que isso revela (conecta com Senior Analysis, ponto 6):** o Kamino assume publicamente que liquidação é parte do jogo e documenta a mecânica com números concretos e variáveis por design. O Spout comunica uma fee "flat e baixa" (5%) que a prática desmente (8.8%) — não porque o modelo variável seja errado (faz sentido dado que ações voláteis carregam mais risco), mas porque a comunicação não acompanhou a implementação. Um usuário vindo de Kamino/MarginFi entraria no Spout esperando o mesmo nível de transparência quantitativa sobre risco de liquidação, e não encontraria.
+**What this reveals (connects to Senior Analysis, point 6):** Kamino publicly assumes liquidation is part of the game and documents the mechanic with concrete, deliberately variable numbers. Spout communicates a "flat, low" fee (5%) that practice contradicts (8.8%) — not because the variable model is wrong (makes sense given volatile stocks carry more risk), but because the communication hasn't kept up with the implementation. A user coming from Kamino/MarginFi would enter Spout expecting the same level of quantitative transparency about liquidation risk, and wouldn't find it.
 
-**Nota sobre RWA vs cripto puro:** vale destacar que o LTV mais conservador do Spout (50% vs 70-80%) faz sentido dado o risco adicional de RWA (settlement T+1/T+2, mercado fechado nos fins de semana, gap risk) — esse é um ponto genuinamente bom de design, não uma crítica. A crítica é só sobre a comunicação da mecânica de liquidação, não sobre o parâmetro em si.
-
----
-
-## O que funciona bem (pra Seção 5 — What Works, evitar report só-crítica)
-
-- Loss waterfall bem desenhado e documentado com números concretos (Insurance Fund → Junior → Senior)
-- `/liquidation-example` é detalhado e educativo, acima da média DeFi
-- Earnings skip pra ações individuais (não abre calls durante earnings) — cuidado de risco que poucos protocolos pensam em implementar
-- Registro FinCEN como MSB é verificável, reforça legitimidade regulatória
-- Modelo de fees é simples de entender no nível macro (0% borrow, 20% protocol fee sobre premium)
+**Note on RWA vs pure crypto:** worth noting that Spout's more conservative LTV (50% vs 70-80%) makes sense given the additional RWA risk (T+1/T+2 settlement, closed weekend markets, gap risk) — this is a genuinely good design choice, not a criticism. The criticism is only about the communication of the liquidation mechanic, not the parameter itself.
 
 ---
 
-## FP-APP-1 — "0% Interest. Always." vs coluna "Borrow Cost" com valores > 0% na própria tela de Trade
+## What works well (for Section 5 — What Works, to avoid an all-critical report)
 
-**What happened:** O banner no topo da tela de Trade diz, em destaque: "0% Interest on borrowing. Always, no matter the market conditions." A poucos centímetros abaixo, a tabela de ativos tem uma coluna chamada "Borrow Cost" com valores reais e não-zero por ativo: GS 0.86%/yr, XOM 0.80%/yr, MSTR 0.58%/yr, IBIT 0.55%/yr, GOOG 0.54%/yr, AAPL 0.37%/yr, PFE 0.07%/yr, GLD 0.06%/yr — e só NVDA, BSOL e SMCI mostram 0.00%/yr.
-
-**Why it caused friction:** Isso contradiz diretamente a claim central do produto ("0% interest, always") na própria tela onde o usuário decide o que comprar. Se "Borrow Cost" for de fato uma taxa cobrada sobre o empréstimo, o headline de marketing do site inteiro está errado/enganoso. Se for outra coisa (ex: alguma métrica de risco disfarçada de "cost", ou o spread do covered call implícito no ativo), o nome do campo está péssimo e confunde qualquer usuário novo.
-
-**Severity:** Critical — é a claim #1 do produto sendo aparentemente contradita na primeira tela que qualquer visitante vê, sem precisar nem conectar carteira.
-
-**Suggested improvement:** Ou (a) renomear "Borrow Cost" pra algo que não confunda com "interest" (ex: "Assignment Probability Cost" ou "Est. Opportunity Cost"), com tooltip explicando o que realmente é, ou (b) se for de fato um custo de juros disfarçado, corrigir o banner.
-
-**RESOLVIDO (parcialmente) via FP-APP-2:** o tooltip do Leverage (screenshot 02) diz literalmente: *"At 2.0x you put up half and borrow half at 0% interest. Higher leverage means more upside but also more **borrower cost**."* — ou seja, o próprio produto usa a expressão "borrower cost" na mesma frase em que reafirma "0% interest". Isso confirma que "Borrow Cost" na tabela de Trade não é juros no sentido tradicional, mas também confirma que EXISTE um custo real de tomar leverage, o que o banner "0% Interest. Always." simplesmente não comunica. A contradição não é um bug de copy isolado — é uma tensão consistente entre o headline de marketing e a explicação técnica real, repetida em pelo menos 2 lugares da UI (banner vs coluna, banner vs tooltip).
-
-**Ainda em aberto:** a coluna "Borrow Cost" na tabela de Trade não tem tooltip próprio (não testado ainda) — não sabemos se ela é literalmente esse "borrower cost" do leverage, ou uma métrica diferente (ex: custo implícito de oportunidade do covered call daquele ativo). Precisa confirmar antes de fechar a análise.
+- Well-designed loss waterfall, documented with concrete numbers (Insurance Fund → Junior → Senior)
+- `/liquidation-example` is detailed and educational, above the DeFi average
+- Earnings skip for individual stocks (no calls opened during earnings) — a risk consideration few protocols think to implement
+- FinCEN registration as an MSB is verifiable, reinforces regulatory legitimacy
+- Fee model is simple to understand at the macro level (0% borrow, 20% protocol fee on premium)
 
 ---
 
-## FP-APP-2 — "Leverage" slider (1.0x–2.0x) no fluxo de Buy não existe em nenhuma página da documentação
+## FP-APP-1 — "0% Interest. Always." vs a "Borrow Cost" column with values > 0% on the same Trade screen
 
-**What happened:** No painel de compra (BUY/SELL NVDA), há um slider de "Leverage" com marcações 1.0x / 1.25x / 1.5x / 2.0x, junto de um ícone de info (não clicado ainda). Nenhuma das 31 páginas de `/docs` menciona um mecanismo de "leverage" no momento da compra — os docs só descrevem alavancagem implícita via lock + borrow (50% LTV) depois que você já possui o spAsset.
+**What happened:** The banner at the top of the Trade screen prominently reads: "0% Interest on borrowing. Always, no matter the market conditions." A few inches below, the asset table has a column called "Borrow Cost" with real, non-zero values per asset: GS 0.86%/yr, XOM 0.80%/yr, MSTR 0.58%/yr, IBIT 0.55%/yr, GOOG 0.54%/yr, AAPL 0.37%/yr, PFE 0.07%/yr, GLD 0.06%/yr — and only NVDA, BSOL, and SMCI show 0.00%/yr.
 
-**Why it caused friction:** É uma feature de risco real (alavancagem até 2x numa simples compra) sem nenhuma explicação prévia nos docs oficiais. Um usuário pode ativar 2.0x sem entender o mecanismo por trás (provavelmente compra a prazo/margin sintética via o próprio protocolo?) — isso é buy-side leverage, distinto do borrow-side LTV que os docs cobrem extensivamente.
+**Why it caused friction:** This directly contradicts the product's central claim ("0% interest, always") on the very screen where the user decides what to buy. If "Borrow Cost" is actually a fee charged on the loan, the entire site's marketing headline is wrong/misleading. If it's something else (e.g., a risk metric disguised as "cost," or an asset's implicit covered-call spread), the field name is terrible and confuses any new user.
 
-**Severity:** Critical — risco financeiro não documentado é o tipo de achado que mais pesa em bounty de UX de lending/borrow.
+**Severity:** Critical — it's the product's claim #1 apparently being contradicted on the first screen any visitor sees, without even connecting a wallet.
 
-**Suggested improvement:** Documentar o mecanismo de leverage no fluxo de Buy com a mesma profundidade que os docs dão ao borrow (Health Factor, liquidation, etc.), ou linkar o tooltip do "i" pra uma página de docs dedicada.
+**Suggested improvement:** Either (a) rename "Borrow Cost" to something that doesn't clash with "interest" (e.g., "Assignment Probability Cost" or "Est. Opportunity Cost"), with a tooltip explaining what it really is, or (b) if it really is disguised interest, fix the banner.
 
-**TODO PRIORITÁRIO:** clicar no ícone "i" ao lado de "Leverage" e documentar exatamente o que aparece. Testar mover o slider pra 1.25x e ver se aparece algum aviso, health factor preview, ou mudança na tela.
+**RESOLVED (partially) via FP-APP-2:** the Leverage tooltip (screenshot 02) literally says: *"At 2.0x you put up half and borrow half at 0% interest. Higher leverage means more upside but also more **borrower cost**."* — meaning the product itself uses the phrase "borrower cost" in the same sentence that reaffirms "0% interest." This confirms that "Borrow Cost" in the Trade table isn't interest in the traditional sense, but also confirms there IS a real cost to taking leverage, which the "0% Interest. Always." banner simply doesn't communicate. The contradiction isn't an isolated copy bug — it's a consistent tension between the marketing headline and the real technical explanation, repeated in at least 2 places in the UI (banner vs column, banner vs tooltip).
 
----
-
-## FP-APP-3 — Tab "Borrow" — REVISADO: não é bug, é empty state (rebaixado de Critical)
-
-**What happened:** A página `/borrow` não está vazia por bug — é um empty state intencional: "Trade stocks, unlock 0% borrowing. Every $10,000 of eligible stock lets you borrow up to $5,000 USDC at 0% interest, without selling anything." + botão "Explore Stocks" que leva de volta pra `/trade` (screenshot 03).
-
-**Why it's actually decent UX:** Confirma corretamente o LTV de 50% (bate com os docs: $5,000/$10,000 = 50%). Direciona o usuário sem colateral pro fluxo certo. Isso não é friction — é onboarding funcionando como deveria.
-
-**Severity:** rebaixado para Low/Info — vale citar no report como exemplo de "what works" (empty states bem guiados), não como problema.
-
-**Novo TODO:** comprar uma posição pequena em NVDA ou outro ativo primeiro, depois voltar em `/borrow` pra ver a tela real de lock+borrow, aí sim testar o fluxo documentado (Health Factor, LTV, etc.)
+**Still open:** the "Borrow Cost" column in the Trade table has no tooltip of its own (not tested yet) — we don't know whether it's literally the leverage's "borrower cost," or a different metric (e.g., that asset's implicit covered-call opportunity cost). Needs confirmation before closing the analysis.
 
 ---
 
-## FP-APP-4 — Nenhum passo de KYC em todo o fluxo de connect (contradiz /security-and-compliance)
+## FP-APP-2 — "Leverage" slider (1.0x–2.0x) in the Buy flow doesn't appear on any documentation page
 
-**What happened:** Fluxo completo de connect documentado (screenshots 05-09): "Log in or sign up" (Privy, email ou wallet externa) → "Select your wallet" (Phantom/Solflare/Backpack/Jupiter/WalletConnect) → aprovação no Phantom → toast "Wallet verified for devnet — you can place test orders now." → painel de wallet mostra saldo devnet ($34.73 USDC de teste) já creditado, sem precisar pedir no faucet. Em nenhum momento desse fluxo apareceu qualquer tela de KYC, verificação de identidade, ou aceite de termos regulatórios.
+**What happened:** On the purchase panel (BUY/SELL NVDA), there's a "Leverage" slider marked 1.0x / 1.25x / 1.5x / 2.0x, alongside an info icon (not yet clicked). None of the 31 `/docs` pages mention a "leverage" mechanism at the time of purchase — the docs only describe implicit leverage via lock + borrow (50% LTV) after you already own the spAsset.
 
-**Why it caused friction / matters:** `/security-and-compliance` nos docs afirma que o protocolo usa "Token-2022 transfer hooks" pra enforcement de KYC diretamente on-chain. Se isso é real, o enforcement deveria bloquear ou pelo menos avisar ANTES de deixar o usuário "verificado pra devnet" e liberado pra ordens de teste. Pode ser que (a) o KYC só seja exigido no mainnet e o beta em devnet pula isso de propósito (razoável, mas não está explicado em lugar nenhum na UI), ou (b) o enforcement realmente só acontece no momento da transação (ex: tenta comprar e É bloqueado ali). Ambas as hipóteses precisam ser testadas antes de reportar como bug.
+**Why it caused friction:** It's a real risk feature (up to 2x leverage on a simple purchase) with no prior explanation anywhere in the official docs. A user could enable 2.0x without understanding the mechanism behind it (probably synthetic margin buying via the protocol itself?) — this is buy-side leverage, distinct from the borrow-side LTV the docs cover extensively.
 
-**Severity:** High — é uma claim de compliance central do produto (citada como parte do case regulatório inteiro) não observável no fluxo real testado até agora.
+**Severity:** Critical — undocumented financial risk is the kind of finding that weighs most heavily in a lending/borrow UX bounty.
 
-**TODO:** tentar uma compra real agora que a wallet está conectada e ver se o KYC aparece nesse momento (ex: modal de "verify your identity" ao clicar em confirmar ordem). Se a ordem passar sem qualquer verificação, documentar como achado forte pro Senior Analysis.
+**Suggested improvement:** Document the leverage mechanism in the Buy flow with the same depth the docs give to borrowing (Health Factor, liquidation, etc.), or link the "i" tooltip to a dedicated docs page.
 
-**Nota positiva:** a UX do connect em si é boa — devnet ativado automaticamente com fundos de teste já disponíveis, sem fricção de pedir manualmente no faucet pra começar (apesar do link do faucet também estar disponível caso precise de mais). Isso facilita MUITO o teste, vale citar como "what works".
-
----
-
-- "Held 1:1 at Alpaca Securities · Reserves 100.2%" — bom, é a Proof of Reserve prometida nos docs, visível e com número real (100.2%, levemente acima de 1:1, provavelmente por arredondamento ou buffer).
-- Tour guiado disponível ("Take a tour") — ainda não clicado; docs de UX-testing recomendam testar SEM o tour primeiro pra capturar fricção real, e DEPOIS comparar com o que o tour explica (ou deixa de explicar).
-- "Market: Open" com relógio ao vivo (2:29:45) — bom sinal de transparência de horário de mercado, relevante pro ângulo de "o que acontece fora do horário" (FP-DOC riscos de gap).
-- Nem todos os ativos têm Market Cap visível (BSOL, GLD, IBIT mostram "—") — possível gap de dado, checar se isso afeta cálculo de algo ou é só cosmético.
-- **Market: Closed agora** (screenshot 04) — Trade screen continua totalmente navegável e o painel de Buy parece ativo mesmo com mercado fechado. TODO: tentar de fato submeter uma ordem de compra com o mercado fechado (sem wallet conectada ainda dá pra ver se o botão muda de "Connect Wallet" pra algo como "Market Closed" ou se fica igual). Relevante direto pro ângulo de risco de weekend/overnight gap (ver seção Financial Safety abaixo) — se a UI deixa parecer que dá pra operar normalmente fora do horário sem nenhum aviso, é friction.
+**PRIORITY TODO:** click the "i" icon next to "Leverage" and document exactly what appears. Test moving the slider to 1.25x and see if any warning, health factor preview, or screen change appears.
 
 ---
 
-## FP-APP-5 — Phantom exibe alerta vermelho "dApp pode ser maliciosa" + "domínio é novo" numa compra legítima
+## FP-APP-3 — "Borrow" tab — REVISED: not a bug, it's an empty state (downgraded from Critical)
 
-**What happened:** Ao confirmar a compra de GOOG, o Phantom Wallet exibiu dois avisos empilhados: um banner vermelho "Esta dApp pode ser maliciosa. Não prossiga, a menos que tenha a certeza de que é segura." e um banner amarelo "Este domínio é novo. Prossiga apenas se confiar neste site." O botão de confirmar aparece com o texto "Confirmar (não seguro)" em vez do padrão do Phantom.
+**What happened:** The `/borrow` page isn't empty due to a bug — it's an intentional empty state: "Trade stocks, unlock 0% borrowing. Every $10,000 of eligible stock lets you borrow up to $5,000 USDC at 0% interest, without selling anything." + an "Explore Stocks" button leading back to `/trade` (screenshot 03).
 
-**Why it caused friction:** Isso é o pior tipo de fricção possível num fluxo financeiro — o próprio software de segurança do usuário está dizendo "não confie nisso" no exato momento da conversão. Pra um usuário novo sem contexto prévio (ex: alguém clicando num anúncio ou vindo de conteúdo), esse alerta sozinho é suficiente pra abandonar a compra. É provavelmente um falso positivo da blocklist do Phantom por causa da idade do domínio (`beta.spout.finance` sendo novo/subdomínio de beta), mas o efeito pro usuário é o mesmo independente da causa.
+**Why it's actually decent UX:** Correctly confirms the 50% LTV (matches the docs: $5,000/$10,000 = 50%). Directs a collateral-less user to the right flow. Not friction — this is onboarding working as intended.
 
-**Severity:** Critical — é um dealbreaker de conversão que nenhum dos docs ou da própria UI do produto menciona ou prepara o usuário pra esperar.
+**Severity:** downgraded to Low/Info — worth citing in the report as an example of "what works" (well-guided empty states), not as a problem.
 
-**Suggested improvement:** (1) Submeter o domínio pra allowlist/verificação de segurança do Phantom, Solflare, Backpack etc antes do lançamento público (processo geralmente existe via formulário dos próprios wallets). (2) Enquanto isso não resolve, adicionar um aviso PRÓPRIO no fluxo de compra tipo "sua wallet pode mostrar um alerta de domínio novo — isso é esperado durante o beta, veja como verificar que é seguro" — assim o produto se antecipa ao medo em vez de deixar o usuário sozinho com um alerta vermelho.
-
-**TODO:** testar se o mesmo alerta aparece com Solflare/Backpack (pode ser blocklist específica do Phantom) — se for só um wallet, é ainda mais fácil de reportar/resolver com eles diretamente.
-
-## FP-APP-5 — ESCALADO: Phantom evolui de "aviso" pra "Pedido bloqueado" completo, confirmado em múltiplos ativos
-
-**Atualização crítica:** o que começou como aviso vermelho (GOOG, screenshot 10) e depois um erro de simulação (BSOL, screenshot 13) agora escalou pra **bloqueio total** numa tentativa de compra de PFE (screenshot 14): tela cheia "Pedido bloqueado" / "Para sua segurança, a Phantom bloqueou este pedido." O único caminho pra prosseguir é o link de baixa visibilidade "Continuar na mesma (não seguro)" — a maioria dos usuários vai simplesmente fechar e desistir aqui.
-
-**Por que isso muda a severidade e o enquadramento:** Já não é mais um problema isolado de um ativo (BSOL) — está acontecendo em GOOG, BSOL e PFE, ou seja, é a **dApp inteira** (`beta.spout.finance`) que está flagada na blocklist de segurança do Phantom, não uma transação ou ativo específico. Isso é o achado mais crítico e mais acionável do report inteiro: **qualquer usuário novo usando Phantom (a wallet Solana mais popular) que tente comprar qualquer ativo no beta vai bater nesse bloqueio total antes mesmo de completar a primeira compra.**
-
-**Severity:** Critical, prioridade #1 do report — é um bloqueador de conversão de topo de funil, afeta 100% dos usuários de Phantom, e é resolvível rapidamente (processo de allowlist/reporte de falso positivo direto com a equipe de segurança do Phantom, normalmente via formulário ou contato direto).
-
-**Dado novo, positivo, capturado nesse mesmo screenshot:** o painel de compra do PFE agora mostra um breakdown de custo que não tínhamos visto: "Amount / Stocks borrowed: $0.00 / 0", "Total amount / Stocks owned: $3.00 / 0.11", "**Est. borrower cost/yr: $0.00**" (em verde) e "Your cost today: $3.00". Isso é uma resposta parcial ao FP-APP-1 (Borrow Cost) — em Leverage 1.0x (sem alavancagem), o "Est. borrower cost/yr" é $0.00, o que sugere que o "Borrow Cost" da tabela só se aplica quando há de fato leverage/borrow envolvido. Falta ainda testar com leverage > 1.0x pra confirmar se o número sobe e bate com o "Borrow Cost" mostrado na tabela pra aquele ativo.
-
-**Resposta do time Spout (Telegram, 09-10/09/2026):** "we're currently in beta and the product is still being tested, as the audit hasn't been completed yet. also, you don't have to interact with real money. all you need to do is request testnet USDC from the Solana Devnet faucet and interact with the product from there. so for now, it might look that way, but we're 100% legit and actively working toward the mainnet launch."
-
-**Análise da resposta:** o time confirma que sabe do aviso e explica o contexto (beta pré-auditoria, sem risco de fundos reais). Isso é útil pra reduzir a preocupação de "é golpe?", mas **não resolve a causa raiz do FP-APP-5**: o bloqueio do Phantom não é sobre a legitimidade do projeto — é sobre a idade/reputação do domínio na blocklist de segurança da wallet, algo que normalmente se resolve com um processo de allowlist/reporte direto com a equipe do Phantom (ou Blowfish/outras firms de detecção que os wallets usam), independente de auditoria de smart contract estar pronta ou não. Vale reforçar isso no report como um follow-up específico: "isso é resolvível hoje, antes mesmo do audit terminar, e resolve uma perda de conversão real."
-
-**Valor pro report:** essa troca em si é uma boa prova de comportamento proativo (Seção de metodologia/adversarial self-review) — reportei o achado ao sponsor antes de submeter, tenho o timestamp e a resposta documentados.
+**New TODO:** buy a small position in NVDA or another asset first, then go back to `/borrow` to see the real lock+borrow screen, and then test the documented flow (Health Factor, LTV, etc.)
 
 ---
 
-**What happened:** A compra de GOOG completou de ponta a ponta — Phantom confirm → "Order placed" → "Your purchase has been confirmed" — sem nenhuma tela de KYC/verificação de identidade em nenhum ponto do fluxo, incluindo o momento exato da transação on-chain.
+## FP-APP-4 — No KYC step anywhere in the connect flow (contradicts /security-and-compliance)
 
-**Why it matters:** Resolve a dúvida aberta do FP-APP-4: pelo menos em devnet, não há enforcement de KYC visível em lugar nenhum do fluxo de compra, apesar de `/security-and-compliance` descrever Token-2022 transfer hooks pra isso. Reforça a hipótese de que o gating de compliance só existe no mainnet e o beta pula isso de propósito, mas isso não está comunicado em nenhum lugar da UI.
+**What happened:** Full documented connect flow (screenshots 05-09): "Log in or sign up" (Privy, email or external wallet) → "Select your wallet" (Phantom/Solflare/Backpack/Jupiter/WalletConnect) → Phantom approval → toast "Wallet verified for devnet — you can place test orders now." → wallet panel shows devnet balance ($34.73 test USDC) already credited, no need to request from the faucet. At no point in this flow did any KYC, identity verification, or regulatory terms acceptance screen appear.
 
-**Severity:** Medium (rebaixado de High já que provavelmente é comportamento esperado de devnet, mas ainda vale reportar a falta de comunicação disso)
+**Why it caused friction / matters:** `/security-and-compliance` in the docs states the protocol uses "Token-2022 transfer hooks" for on-chain KYC enforcement. If that's real, the enforcement should block or at least warn BEFORE letting the user get "verified for devnet" and cleared for test orders. It could be that (a) KYC is only required on mainnet and the devnet beta skips it on purpose (reasonable, but not explained anywhere in the UI), or (b) the enforcement actually only happens at the moment of transaction (e.g., tries to buy and IS blocked there). Both hypotheses need testing before reporting this as a bug.
 
----
+**Severity:** High — it's a central compliance claim of the product (cited as part of the entire regulatory case) not observable in the real flow tested so far.
 
-## FP-APP-7 — Mensagens inconsistentes sobre status da ordem com mercado fechado
+**TODO:** try a real purchase now that the wallet is connected and see if KYC appears at that moment (e.g., an "verify your identity" modal when confirming the order). If the order goes through with no verification, document it as a strong finding for the Senior Analysis.
 
-**What happened:** O modal de confirmação diz claramente "Market is closed. Your order fills at 9:30 AM ET, 10 Sep" (screenshot 11) — ótima transparência. Mas a tabela de "Open Orders" logo em seguida mostra Status = **"Executing"** (screenshot 12), o que sugere que algo está acontecendo agora, não que está numa fila esperando a abertura do mercado.
-
-**Why it caused friction:** Pequena mas real — "Executing" e "fills at 9:30 AM ET amanhã" comunicam coisas diferentes. Um usuário que só olha a tabela de Open Orders (sem lembrar do modal) pode achar que a ordem está sendo processada agora e ficar confuso por que não reflete no saldo.
-
-**Severity:** Low — quick win fácil de corrigir (trocar o label pra "Queued" ou "Pending market open").
-
-**Suggested improvement:** Status label deveria mudar pra "Queued" ou "Scheduled" quando o mercado está fechado, reservando "Executing" pra quando a ordem já está de fato em processamento.
+**Positive note:** the connect UX itself is good — devnet auto-activated with test funds already available, no friction of manually requesting from the faucet to start (though the faucet link is also available if more is needed). This makes testing MUCH easier, worth citing as "what works."
 
 ---
 
-## FP-APP-8 — Total pago não bate exatamente com o valor de shares exibido (arredondamento)
-
-**What happened:** "You own 0.01 GOOG" / "Bought at $328.39" / "Total paid $3.00". Mas 0.01 × $328.39 = $3.28, não $3.00. Provavelmente o usuário digitou "$3" como Amount e o app calculou as shares fracionárias reais (≈0.00913) mas exibiu arredondado pra "0.01" na tela de confirmação.
-
-**Why it caused friction:** É um problema de precisão de exibição, não de cálculo (o total pago de $3.00 está provavelmente certo, é a contagem de shares que está arredondada de forma enganosa). Um usuário que confia no "0.01 GOOG" mostrado e depois vai vender pode se surpreender que o saldo real é menor.
-
-**Severity:** Low/Medium — não é um bug financeiro real, é uma questão de exibição, mas em produto financeiro qualquer imprecisão de número gera desconfiança.
-
-**RESOLVIDO/ATUALIZADO — Portfolio confirma que o dado real está correto:** a tela de Portfolio (10/09/2026, mercado aberto) mostra a posição com precisão completa: **0.009171 GOOG**, preço $326.14, valor de mercado $2.99. Isso confirma que o cálculo sempre esteve certo — o problema era só a exibição arredondada no modal de confirmação da compra ("0.01 GOOG"). Na tabela de Trade, o "Shares owned" agora mostra "< 0.01" pra essa posição, o que é uma exibição correta e honesta (evita a falsa precisão do "0.01" exato). **Rebaixado definitivamente pra Low** — é só o modal de confirmação pós-compra que precisa mais casas decimais; o resto do produto já trata isso bem.
+- "Held 1:1 at Alpaca Securities · Reserves 100.2%" — good, this is the Proof of Reserve promised in the docs, visible with a real number (100.2%, slightly above 1:1, probably due to rounding or a buffer).
+- Guided tour available ("Take a tour") — not yet clicked; UX-testing best practice recommends testing WITHOUT the tour first to capture real friction, and THEN comparing with what the tour explains (or fails to explain).
+- "Market: Open" with a live clock (2:29:45) — good sign of market-hours transparency, relevant to the "what happens outside hours" angle (FP-DOC gap risks).
+- Not every asset has a visible Market Cap (BSOL, GLD, IBIT show "—") — possible data gap, check whether this affects any calculation or is purely cosmetic.
+- **Market: Closed now** (screenshot 04) — the Trade screen remains fully navigable and the Buy panel appears active even with the market closed. TODO: actually try submitting a buy order with the market closed (without a connected wallet, it's not yet possible to see whether the button changes from "Connect Wallet" to something like "Market Closed" or stays the same). Directly relevant to the weekend/overnight gap risk angle (see Financial Safety section above) — if the UI makes it seem like you can operate normally outside hours with no warning, that's friction.
 
 ---
 
-## FP-APP-9 — BSOL: Phantom falha em simular a transação ("Não foi possível simular os resultados desta solicitação")
+## FP-APP-5 — Phantom shows a red "dApp may be malicious" + "domain is new" alert on a legitimate purchase
 
-**What happened:** Ao tentar comprar BSOL (Bitwise Solana Staking ETF), o Phantom exibiu os mesmos avisos de "dApp maliciosa" / "domínio novo" do FP-APP-5, **mais** um terceiro alerta vermelho novo e mais grave: "Não foi possível simular os resultados desta solicitação." O botão de confirmar continua disponível como "Confirmar (não seguro)" — ainda não confirmado, aguardando.
+**What happened:** Upon confirming the GOOG purchase, Phantom Wallet displayed two stacked warnings: a red banner "This dApp may be malicious. Don't proceed unless you're sure it's safe." and a yellow banner "This domain is new. Only proceed if you trust this site." The confirm button shows "Confirm (unsafe)" instead of Phantom's default text.
 
-**Why it's different/worse than FP-APP-5:** O aviso de "domínio novo" é reputacional (idade do domínio na blocklist). Já "não foi possível simular" é um sinal técnico — o Phantom tenta rodar a transação num ambiente de simulação antes de assinar, pra prever o resultado (que tokens saem, que tokens entram) e mostrar pro usuário. Quando essa simulação falha, geralmente indica uma de duas coisas: (a) a transação vai reverter/falhar on-chain mesmo, ou (b) a instrução usa algo que o simulador não processa bem (ex: CPI complexo, dependência de estado que só existe no momento exato da execução). Ambos os cenários merecem investigação antes de confirmar.
+**Why it caused friction:** This is the worst possible kind of friction in a financial flow — the user's own security software is saying "don't trust this" at the exact moment of conversion. For a new user with no prior context (e.g., someone clicking an ad or coming from content), this alert alone is enough to abandon the purchase. It's probably a false positive from Phantom's blocklist due to the domain's age (`beta.spout.finance` being a new/beta subdomain), but the effect on the user is the same regardless of the cause.
 
-**Severity:** Critical — se a causa for (a), é um bug real que vai desperdiçar gas do usuário numa transação fadada a falhar. Se for (b), ainda assim é uma fricção grave: o usuário perde justamente a preview que deveria dar confiança pra assinar.
+**Severity:** Critical — this is a conversion dealbreaker that neither the docs nor the product's own UI mention or prepare the user for.
 
-**TODO PRIORITÁRIO:** decisão a tomar quando formos confirmar — (1) se confirmar e a tx passar on-chain com sucesso, documentar que foi falso alarme de simulação (mas ainda reportável como friction de UX). (2) se falhar on-chain, é uma prova concreta de bug real, com hash de erro pra documentar. Comparar também se esse erro é específico de BSOL (talvez por ser um ETF/staking token com lógica diferente de uma ação comum) ou se acontece com qualquer ativo — já vimos GOOG confirmar sem esse erro específico de simulação (só os avisos reputacionais), então é bem possível que seja específico do BSOL.
+**Suggested improvement:** (1) Submit the domain for allowlisting/security review with Phantom, Solflare, Backpack, etc. before public launch (a process usually exists via the wallets' own forms). (2) Until that's resolved, add an in-product notice in the purchase flow like "your wallet may show a new-domain alert — this is expected during beta, here's how to verify it's safe" — so the product gets ahead of the fear instead of leaving the user alone with a red alert.
 
-**Nota:** ainda não confirmada — aguardando decisão de prosseguir ou cancelar antes de registrar o resultado final.
+**TODO:** test whether the same alert appears with Solflare/Backpack (could be a Phantom-specific blocklist) — if it's just one wallet, it's even easier to report/resolve with them directly.
+
+## FP-APP-5 — ESCALATED: Phantom escalates from "warning" to a full "Request blocked," confirmed across multiple assets
+
+**Critical update:** what started as a red warning (GOOG, screenshot 10) and then a simulation error (BSOL, screenshot 13) has now escalated to a **full block** on a PFE purchase attempt (screenshot 14): a full red-screen "Request blocked" / "For your safety, Phantom has blocked this request." The only way to proceed is the low-visibility "Continue anyway (unsafe)" link — most users will simply close and give up here.
+
+**Why this changes the severity and framing:** This is no longer an isolated single-asset problem (BSOL) — it's happening on GOOG, BSOL, and PFE, meaning the **entire dApp** (`beta.spout.finance`) is flagged in Phantom's security blocklist, not a specific transaction or asset. This is the most critical and most actionable finding in the entire report: **any new Phantom user (the most popular Solana wallet) trying to buy any asset in the beta will hit this full block before even completing their first purchase.**
+
+**Severity:** Critical, priority #1 of the report — this is a top-of-funnel conversion blocker, affects 100% of Phantom users, and is quickly resolvable (an allowlist/false-positive report process directly with Phantom's security team, usually via a form or direct contact).
+
+**New, positive data captured in this same screenshot:** the PFE purchase panel now shows a cost breakdown we hadn't seen before: "Amount / Stocks borrowed: $0.00 / 0", "Total amount / Stocks owned: $3.00 / 0.11", "**Est. borrower cost/yr: $0.00**" (in green) and "Your cost today: $3.00." This is a partial answer to FP-APP-1 (Borrow Cost) — at Leverage 1.0x (no leverage), the "Est. borrower cost/yr" is $0.00, which suggests the table's "Borrow Cost" only applies when there's actual leverage/borrow involved. Still need to test with leverage > 1.0x to confirm the number rises and matches the "Borrow Cost" shown in the table for that asset.
+
+**Spout team's response (Telegram, 09-10/09/2026):** "we're currently in beta and the product is still being tested, as the audit hasn't been completed yet. also, you don't have to interact with real money. all you need to do is request testnet USDC from the Solana Devnet faucet and interact with the product from there. so for now, it might look that way, but we're 100% legit and actively working toward the mainnet launch."
+
+**Analysis of the response:** the team confirms they're aware of the alert and explains the context (pre-audit beta, no real-fund risk). This is useful to ease the "is this a scam?" concern, but **doesn't resolve the root cause of FP-APP-5**: Phantom's block isn't about the project's legitimacy — it's about the wallet's security blocklist age/reputation, which is normally resolved through an allowlist/report process directly with Phantom's team (or Blowfish/other detection firms the wallets use), independent of whether the smart contract audit is complete. Worth reinforcing this in the report as a specific follow-up: "this is resolvable today, even before the audit is done, and fixes a real conversion loss."
+
+**Value for the report:** this exchange itself is good proof of proactive behavior (methodology/adversarial self-review section) — I reported the finding to the sponsor before submitting, and have the timestamp and response documented.
 
 ---
 
-- Transparência sobre mercado fechado: avisa claramente ANTES de confirmar que a ordem só executa na próxima abertura (9:30 AM ET) — melhor que muitos produtos tradicionais de corretora que escondem isso.
-- Fluxo de compra é rápido: da tela de Trade até "purchase confirmed" em poucos cliques, sem redirecionamentos desnecessários.
-- Toast de "Order placed — tx [hash]" com link implícito pro explorer é uma boa prática de transparência on-chain que os docs prometem e a UI de fato entrega.
+**What happened:** The GOOG purchase completed end-to-end — Phantom confirm → "Order placed" → "Your purchase has been confirmed" — with no KYC/identity verification screen at any point in the flow, including the exact moment of the on-chain transaction.
+
+**Why it matters:** Resolves the open question from FP-APP-4: at least on devnet, there's no visible KYC enforcement anywhere in the purchase flow, despite `/security-and-compliance` describing Token-2022 transfer hooks for this. Reinforces the hypothesis that compliance gating only exists on mainnet and the beta skips it on purpose, but this isn't communicated anywhere in the UI.
+
+**Severity:** Medium (downgraded from High since this is likely expected devnet behavior, but still worth reporting the lack of communication about it)
 
 ---
 
-- [x] Landing page → tela de Trade carrega direto, SEM exigir connect pra ver preços/dados — bom pra fricção zero de descoberta
-- [ ] Wallet connect: o que estava claro / confuso? (ainda não clicado)
-- [x] Onboarding: KYC não apareceu em nenhum momento do connect (ver FP-APP-4) — verificar se aparece na hora da ordem
-- [x] Primeira tela pós-connect: painel de wallet mostra saldo devnet, é claro e direto — bom onboarding de teste
-- [x] Primeira hesitação real capturada: "Borrow Cost" != "0% interest" (ver FP-APP-1 acima)
-- [x] Segunda hesitação real capturada: "Leverage" slider sem explicação (ver FP-APP-2 acima)
-- [ ] Screenshot desta tela salvo em assets/screenshots/
+## FP-APP-7 — Inconsistent messaging about order status with the market closed
+
+**What happened:** The confirmation modal clearly says "Market is closed. Your order fills at 9:30 AM ET, 10 Sep" (screenshot 11) — great transparency. But the "Open Orders" table right after shows Status = **"Executing"** (screenshot 12), which suggests something is happening now, not that it's queued waiting for market open.
+
+**Why it caused friction:** Small but real — "Executing" and "fills at 9:30 AM ET tomorrow" communicate different things. A user who only looks at the Open Orders table (without recalling the modal) might think the order is being processed right now and get confused why it doesn't reflect in their balance.
+
+**Severity:** Low — easy quick win (swap the label for "Queued" or "Pending market open").
+
+**Suggested improvement:** The status label should change to "Queued" or "Scheduled" when the market is closed, reserving "Executing" for when the order is actually being processed.
 
 ---
 
-## Confirmação: ordem GOOG preencheu corretamente (10/09/2026, mercado aberto)
+## FP-APP-8 — Total paid doesn't exactly match the displayed shares value (rounding)
 
-- Order placed ontem (mercado fechado) → hoje 9:30 AM ET a ordem executou normalmente, como prometido no modal ("Market is closed. Your order fills at 9:30 AM ET, 10 Sep") — **promessa cumprida, sem surpresas**. Bom ponto pra "What Works": a comunicação de fill futuro foi precisa.
+**What happened:** "You own 0.01 GOOG" / "Bought at $328.39" / "Total paid $3.00." But 0.01 × $328.39 = $3.28, not $3.00. The user probably typed "$3" as Amount and the app calculated the real fractional shares (≈0.00913) but displayed it rounded to "0.01" on the confirmation screen.
+
+**Why it caused friction:** This is a display-precision issue, not a calculation bug (the $3.00 total paid is probably correct, it's the share count that's misleadingly rounded). A user who trusts the shown "0.01 GOOG" and later goes to sell might be surprised the real balance is smaller.
+
+**Severity:** Low/Medium — not a real financial bug, it's a display issue, but in a financial product any number imprecision breeds distrust.
+
+**RESOLVED/UPDATED — Portfolio confirms the real data is correct:** the Portfolio screen (09/10/2026, market open) shows the position with full precision: **0.009171 GOOG**, price $326.14, market value $2.99. This confirms the calculation was always correct — the problem was only the rounded display in the post-purchase confirmation modal ("0.01 GOOG"). In the Trade table, "Shares owned" now shows "< 0.01" for that position, which is a correct, honest display (avoids the false precision of an exact "0.01"). **Definitively downgraded to Low** — only the post-purchase confirmation modal needs more decimal places; the rest of the product already handles this well.
+
+---
+
+## FP-APP-9 — BSOL: Phantom fails to simulate the transaction ("Could not simulate the results of this request")
+
+**What happened:** Attempting to buy BSOL (Bitwise Solana Staking ETF), Phantom showed the same "dApp may be malicious"/"new domain" warnings from FP-APP-5, **plus** a third, new and more serious red alert: "Could not simulate the results of this request." The confirm button remains available as "Confirm (unsafe)" — not yet confirmed, awaiting.
+
+**Why it's different/worse than FP-APP-5:** The "new domain" warning is reputational (domain age in the blocklist). "Could not simulate" is a technical signal — Phantom tries to run the transaction in a simulated environment before signing, to predict the outcome (which tokens leave, which come in) and show the user. When that simulation fails, it usually means one of two things: (a) the transaction would revert/fail on-chain anyway, or (b) the instruction uses something the simulator can't process well (e.g., complex CPI, state dependency that only exists at the exact moment of execution). Both scenarios deserve investigation before confirming.
+
+**Severity:** Critical — if the cause is (a), it's a real bug that would waste the user's gas on a transaction doomed to fail. If (b), it's still a serious friction: the user loses exactly the preview that should give them confidence to sign.
+
+**PRIORITY TODO:** decision to make when confirming — (1) if I confirm and the tx succeeds on-chain, document it as a simulation false alarm (still reportable as UX friction). (2) if it fails on-chain, it's concrete proof of a real bug, with an error hash to document. Also compare whether this error is specific to BSOL (maybe because it's an ETF/staking token with different logic than a regular stock) or happens with any asset — GOOG already confirmed without this specific simulation error (only the reputational warnings), so it's quite possible this is BSOL-specific.
+
+**Note:** not yet confirmed — awaiting a decision to proceed or cancel before recording the final result.
+
+---
+
+- Transparency about the closed market: clearly warns BEFORE confirming that the order only executes at the next open (9:30 AM ET) — better than many traditional brokerage products that hide this.
+- Purchase flow is fast: from the Trade screen to "purchase confirmed" in a few clicks, no unnecessary redirects.
+- The "Order placed — tx [hash]" toast with an implicit link to the explorer is a good on-chain transparency practice the docs promise and the UI actually delivers.
+
+---
+
+- [x] Landing page → Trade screen loads directly, WITHOUT requiring connect to see prices/data — good zero-friction discovery
+- [ ] Wallet connect: what was clear/confusing? (not yet clicked)
+- [x] Onboarding: KYC didn't appear at any point of connect (see FP-APP-4) — check if it appears at order time
+- [x] First screen post-connect: wallet panel shows devnet balance, clear and direct — good test onboarding
+- [x] First real hesitation captured: "Borrow Cost" != "0% interest" (see FP-APP-1 above)
+- [x] Second real hesitation captured: "Leverage" slider with no explanation (see FP-APP-2 above)
+- [ ] Screenshot of this screen saved in assets/screenshots/
+
+---
+
+## Confirmation: GOOG order filled correctly (09/10/2026, market open)
+
+- Order placed yesterday (market closed) → today at 9:30 AM ET the order executed normally, exactly as promised in the modal ("Market is closed. Your order fills at 9:30 AM ET, 10 Sep") — **promise fulfilled, no surprises**. Good point for "What Works": the future-fill communication was accurate.
 - **Portfolio Overview:** Total Equity $2.99, Total Borrowed $0.00, Net Worth $2.99, **Available Borrowing Power $1.50**
-- Confirma LTV de 50%: $2.99 × 50% = $1.495 ≈ $1.50 — bate exatamente com os docs (`/how-borrowing-works`, `/health-factor`). Ótimo sinal de consistência entre documentação e implementação real.
-- "My Holdings" mostra a posição com status "Active" e precisão completa nas shares (0.009171) — ver atualização do FP-APP-8 acima.
-- "Positions" (parte de baixo, referente a posições de borrow) mostra "No Positions — Deposit collateral to open a position" — próximo passo natural agora: ir em `/borrow`, essa posição de GOOG já deveria aparecer como colateral disponível.
+- Confirms the 50% LTV: $2.99 × 50% = $1.495 ≈ $1.50 — matches the docs exactly (`/how-borrowing-works`, `/health-factor`). Great sign of consistency between documentation and real implementation.
+- "My Holdings" shows the position with "Active" status and full share precision (0.009171) — see the FP-APP-8 update above.
+- "Positions" (bottom section, referring to borrow positions) shows "No Positions — Deposit collateral to open a position" — the natural next step now: go to `/borrow`, that GOOG position should already appear as available collateral.
 
 ---
 
-## Monitoramento da posição GOOG ao longo do tempo
+## GOOG position monitoring over time
 
-**Dia 1 (10/09, fill):** 0.009171 GOOG @ ~$326.14, valor $2.99, LTV disponível $1.50
-**Dia 2 (12/09, sexta à noite):** mesma posição (0.009171 GOOG), preço subiu pra $335.38, valor $3.08, **Unrealized P&L: +$0.09 (+2.87%)**, Available Borrowing Power subiu proporcionalmente pra $1.54 (50% de $3.08)
+**Day 1 (09/10, fill):** 0.009171 GOOG @ ~$326.14, value $2.99, LTV available $1.50
+**Day 2 (09/12, Friday night):** same position (0.009171 GOOG), price rose to $335.38, value $3.08, **Unrealized P&L: +$0.09 (+2.87%)**, Available Borrowing Power rose proportionally to $1.54 (50% of $3.08)
 
-**Observação:** o "Available Borrowing Power" recalculou corretamente e em tempo real conforme o valor de mercado da posição mudou — confirma que o LTV de 50% é dinâmico (recalculado sobre o valor atual, não travado no valor de entrada), consistente com os docs de Health Factor. Bom sinal de correção matemática do sistema, mesmo com os bugs de API já documentados (FP-APP-12) — sugere que os bugs são na camada de exibição/comunicação de erro, não no cálculo core de portfólio.
+**Observation:** "Available Borrowing Power" recalculated correctly and in real time as the position's market value changed — confirms the 50% LTV is dynamic (recalculated over the current value, not locked at entry value), consistent with the Health Factor docs. Good sign of the system's mathematical correctness, even with the already-documented API bugs (FP-APP-12) — suggests the bugs are in the display/error-communication layer, not the core portfolio calculation.
 
-**Abas exploradas (Dia 2):**
-- **Transaction History**: registro limpo e completo — "Yesterday / 10:30 AM / Bought GOOG / 0.009171 shares at $326.03 / +0.009171 GOOG / $2.99 / Fees: -- / Completed". Tem botão "Export CSV", bom sinal de produto pensando em auditoria/contabilidade do usuário.
-- **Activity**: "No Activity — Your open orders will appear here", empty state limpo, consistente com o padrão bom já visto em `/borrow`. Correto estar vazio (nunca confirmamos as tentativas de borrow de $0.08/$0.48).
-- **Nota menor de precisão:** o preço de compra aparece como $326.03 aqui, mas telas anteriores (modal de confirmação, portfolio) mostraram $326.14 e $326.22 em momentos diferentes — provavelmente só reflete o preço exato no timestamp de cada consulta (mercado se moveu entre a compra e as visualizações), não é um bug, mas vale mencionar como nota de precisão no report caso o preço final registrado on-chain divirja do que aparece na tabela.
+**Tabs explored (Day 2):**
+- **Transaction History**: clean, complete record — "Yesterday / 10:30 AM / Bought GOOG / 0.009171 shares at $326.03 / +0.009171 GOOG / $2.99 / Fees: -- / Completed." Has an "Export CSV" button, good sign of a product designed with user-side auditing/accounting in mind.
+- **Activity**: "No Activity — Your open orders will appear here," a clean empty state, consistent with the already-good pattern seen in `/borrow`. Correctly empty (never confirmed the $0.08/$0.48 borrow attempts).
+- **Minor precision note:** the purchase price shows as $326.03 here, but earlier screens (confirmation modal, portfolio) showed $326.14 and $326.22 at different moments — probably just reflects the exact price at each query's timestamp (market moved between the purchase and the views), not a bug, but worth mentioning as a precision note in the report in case the final on-chain-recorded price diverges from what appears in the table.
 
 ---
 
-## Sessão de diversificação — 5 novas posições abertas com mercado fechado (11/09/2026)
+## Diversification session — 5 new positions opened with the market closed (09/11/2026)
 
-Ordens colocadas propositalmente com mercado fechado, pra (a) reforçar o FP-APP-7 com mais amostras e (b) diversificar volatilidade pro monitoramento da semana:
+Orders placed deliberately with the market closed, to (a) reinforce FP-APP-7 with more samples and (b) diversify volatility for the week's monitoring:
 
-| Asset | Amount | Status exibido | Placed |
+| Asset | Amount | Displayed status | Placed |
 |---|---|---|---|
-| BSOL | $5.00 | Executing | 11 de set. |
-| MSTR | $5.00 | Executing | 11 de set. |
-| AAPL | $5.00 | Executing | 11 de set. |
-| PFE | $5.00 | Executing | 11 de set. |
-| GS | $3.00 | Executing | 11 de set. |
+| BSOL | $5.00 | Executing | Sep 11 |
+| MSTR | $5.00 | Executing | Sep 11 |
+| AAPL | $5.00 | Executing | Sep 11 |
+| PFE | $5.00 | Executing | Sep 11 |
+| GS | $3.00 | Executing | Sep 11 |
 
-**Confirma FP-APP-7 em escala:** todas as 5 ordens mostram "Executing" (amarelo) mesmo com o mercado fechado — não é caso isolado do GOOG, é o comportamento padrão do sistema pra qualquer ordem colocada fora do horário. Reforça a recomendação: trocar pra "Queued"/"Pending Market Open" quando `Market: Closed`.
+**Confirms FP-APP-7 at scale:** all 5 orders show "Executing" (yellow) even with the market closed — not an isolated GOOG case, it's the system's default behavior for any order placed outside market hours. Reinforces the recommendation: swap to "Queued"/"Pending Market Open" when `Market: Closed`.
 
-**Boa cobertura de volatilidade pro monitoramento da semana:** MSTR e BSOL (mais voláteis, cripto-adjacentes) vs PFE/AAPL/GS (mais estáveis) — vai permitir comparar Borrow Cost real por volatilidade quando as posições preencherem na segunda-feira de manhã (9:30 AM ET) e o Health Factor de cada uma ao longo da semana.
-
----
-
-## Inteligência competitiva — thread de outro tester (@blessedboy32, 11/09)
-
-**Confirmação independente forte:** ele também encontrou "CollateralType: unexpected length 213..." no fluxo de borrow do NVDA, e descreve o mesmo sintoma que vimos: "UI still shows a max borrow amount. Click it and it says the position supports $0.00." — isso é uma **segunda fonte independente confirmando o FP-APP-12**, reforça muito a credibilidade desse achado no report final (posso citar como "corroborated by other independent testers in the same beta cohort").
-
-**3 bugs novos, ainda não testados por nós — TODO validar:**
-1. **Modal de confirmação de venda reusa o template de compra**: "Sell confirmation modal still says 'Your purchase has been confirmed'" — bug de copy/template não trocado entre fluxos de buy/sell.
-2. **Campos em branco no Portfolio**: "Portfolio shows Total Equity but Net Worth + Available Borrowing Power stay blank" — diferente do que vimos no nosso teste (onde esses campos apareceram corretamente), pode ser um estado específico (talvez após uma venda parcial, ou outro ativo).
-3. **"Max sell" deixa poeira residual**: "Max sell leaves dust instead of fully closing the position" — sugere que o botão "Max" no Sell não vende 100% da posição, sobra uma fração residual.
-
-**Ângulo de UX friction dele, vale considerar:**
-- "Heavy gating (email + passcode) slows real testing" — friction de onboarding que talvez não tenhamos sentido tanto (usamos Phantom direto, sem o fluxo de email do Privy). Vale testar o fluxo de email+passcode também, se ainda não tivermos feito.
-- "High cognitive load — locking into weekly options cycles, health factor, potential assignment" — visão qualitativa que reforça nosso Senior Analysis (ponto 6, sobre a mistura de linguagem fintech tranquilizadora com mecânica real de derivativo).
-
-**Como usar isso no report:** não precisa (nem deve) citar o tester nominalmente — mas vale registrar que o achado técnico #1 foi corroborado externamente, e testar os 3 bugs novos (venda parcial/total de uma posição pequena, ex: vender uma fração do GOOG) antes de fechar o report, já que temos posição ativa suficiente pra reproduzir.
+**Good volatility coverage for the week's monitoring:** MSTR and BSOL (more volatile, crypto-adjacent) vs PFE/AAPL/GS (more stable) — will allow comparing the real Borrow Cost by volatility once positions fill Monday morning (9:30 AM ET) and each one's Health Factor over the week.
 
 ---
 
-## FP-APP-15 — CRÍTICO: Avg Cost do AAPL incorreto, causando erro massivo de P&L exibido
+## Competitive intelligence — another tester's thread (@blessedboy32, 09/11)
 
-**What happened:** Segunda-feira, mercado aberto, as 5 posições novas preencheram (screenshot 36). Validando a matemática de cada linha (shares × avg cost deveria bater com o valor da ordem original, ~$5 ou $3):
+**Strong independent confirmation:** they also found "CollateralType: unexpected length 213..." in NVDA's borrow flow, and describe the same symptom we saw: "UI still shows a max borrow amount. Click it and it says the position supports $0.00." — this is a **second independent source confirming FP-APP-12**, strongly reinforcing that finding's credibility in the final report (can cite as "corroborated by other independent testers in the same beta cohort").
 
-| Asset | Shares | Avg Cost | Cost Basis Calculado | Valor da ordem | Bate? |
+**3 new bugs, not yet tested by us — TODO validate:**
+1. **Sell confirmation modal reuses the buy template**: "Sell confirmation modal still says 'Your purchase has been confirmed' (reused buy template)" — a copy/template bug not swapped between buy/sell flows.
+2. **Blank fields in Portfolio**: "Portfolio shows Total Equity but Net Worth + Available Borrowing Power stay blank" — different from what we saw in our test (where those fields appeared correctly), could be a specific state (maybe after a partial sale, or a different asset).
+3. **"Max sell" leaves residual dust**: "Max sell leaves dust instead of fully closing the position" — suggests the Sell "Max" button doesn't sell 100% of the position, some fraction is left over.
+
+**Their UX friction angle, worth considering:**
+- "Heavy gating (email + passcode) slows real testing" — onboarding friction we may not have felt as much (we used Phantom directly, without Privy's email flow). Worth testing the email+passcode flow too, if we haven't already.
+- "High cognitive load — locking into weekly options cycles, health factor, potential assignment" — a qualitative view that reinforces our Senior Analysis (point 6, about mixing reassuring fintech language with real derivative mechanics).
+
+**How to use this in the report:** no need (and shouldn't) name the tester — but worth noting that technical finding #1 was corroborated externally, and testing the 3 new bugs (partial/full sale of a small position, e.g., selling a fraction of GOOG) before finalizing the report, since we have an active position large enough to reproduce.
+
+---
+
+## FP-APP-15 — CRITICAL: Incorrect AAPL Avg Cost, causing a massive error in displayed P&L
+
+**What happened:** Monday, market open, the 5 new positions filled (screenshot 36). Validating each row's math (shares × avg cost should match the original order value, ~$5 or $3):
+
+| Asset | Shares | Avg Cost | Calculated Cost Basis | Order value | Match? |
 |---|---|---|---|---|---|
 | MSTR | 0.038121 | $130.90 | $4.99 | $5.00 | ✅ |
 | BSOL | 0.35822 | $13.93 | $4.99 | $5.00 | ✅ |
 | PFE | 0.177013 | $28.19 | $4.99 | $5.00 | ✅ |
 | GOOG | 0.009171 | $326.03 | $2.99 | $2.99 | ✅ |
 | GS | 0.00296 | $1,010.00 | $2.99 | $3.00 | ✅ |
-| **AAPL** | **0.014912** | **$334.62** | **$4.99** | **$5.00** | ✅ (a ordem em si bate) |
+| **AAPL** | **0.014912** | **$334.62** | **$4.99** | **$5.00** | ✅ (the order itself matches) |
 
-A ordem do AAPL bate matematicamente com a intenção original ($5 → 0.014912 shares a $334.62). **O problema é que $334.62 não é um preço remotamente próximo do AAPL real no momento da compra** — o preço atual exibido na mesma linha é $228.50, uma diferença de 46%. Se o Avg Cost estivesse certo (perto de $228), o P&L seria próximo de zero (mercado mal se moveu desde a ordem). Mas com Avg Cost em $334.62, a perda real calculável é **-$1.58 (-31.7%)** — só que a tela mostra **"$-0.02 (-0.50%)"**, um número completamente diferente e igualmente errado (nem bate com o Avg Cost errado, nem com um Avg Cost correto).
+The AAPL order matches the original intent mathematically ($5 → 0.014912 shares at $334.62). **The problem is that $334.62 isn't anywhere close to AAPL's real price at the time of purchase** — the current price shown in the same row is $228.50, a 46% difference. If Avg Cost were correct (near $228), the P&L would be close to zero (the market barely moved since the order). But with Avg Cost at $334.62, the real calculable loss is **-$1.58 (-31.7%)** — yet the screen shows **"$-0.02 (-0.50%)"**, a completely different, equally wrong number (matching neither the wrong Avg Cost nor a correct one).
 
-**Why this is critical:** É um erro duplo — (1) o Avg Cost gravado pra AAPL está incorreto por uma margem enorme (o dado de preço de execução usado pareceu ter vindo de outro ativo/período, "$334" não é preço plausível recente do AAPL), e (2) o P&L exibido nem sequer é consistente com o Avg Cost errado — é um terceiro número, sugerindo que o cálculo de P&L na tela usa uma fonte de dado diferente da que populou o Avg Cost. Isso é o tipo de bug que, em produção real com dinheiro de verdade, mostraria ao usuário uma perda/ganho completamente fictício.
+**Why this is critical:** It's a double error — (1) the Avg Cost recorded for AAPL is wrong by a huge margin (the execution price data used seemed to come from another asset/time period, "$334" isn't a plausible recent AAPL price), and (2) the displayed P&L isn't even consistent with the wrong Avg Cost — it's a third number, suggesting the screen's P&L calculation uses a different data source than the one that populated Avg Cost. This is the kind of bug that, in real production with real money, would show the user a completely fictional loss/gain.
 
-**Severity:** Critical — integridade de dado financeiro é a categoria mais sensível possível num produto desse tipo; um P&L exibido incorretamente pode literalmente levar a decisões de venda/hold erradas.
+**Severity:** Critical — financial data integrity is the most sensitive possible category in a product like this; an incorrectly displayed P&L could literally lead to wrong sell/hold decisions.
 
-**TODO:** verificar se esse erro é específico do AAPL (talvez colisão de preço com outro ativo no backend, dado que $334 não corresponde a nada óbvio) ou se acontece com qualquer ativo em certas condições. Comparar com o hash da transação on-chain do AAPL se possível, pra confirmar se o preço de execução real (on-chain) bate com $228 (correto) ou $334 (o que está sendo exibido).
+**TODO:** check whether this error is specific to AAPL (maybe a price collision with another asset on the backend, given that $334 doesn't correspond to anything obvious) or happens with any asset under certain conditions. Compare against AAPL's on-chain transaction hash if possible, to confirm whether the real execution price (on-chain) matches $228 (correct) or $334 (what's being displayed).
 
 ---
 
-## FP-APP-16 — CRÍTICO: Ordens de venda marcadas como "Failed" mas EXECUTADAS de verdade (shares realmente debitadas)
+## FP-APP-16 — CRITICAL: Sell orders marked "Failed" but ACTUALLY EXECUTED (shares really debited)
 
-**What happened:** Duas ordens de venda (PFE e GOOG, 15/09) aparecem na tabela "Open Orders" com status **"Failed"**, cada uma com um detalhe de execução parcial estranho (ex: "Failed 0.036519942 @ $27.43"). Comparando os holdings antes e depois dessas ordens:
+**What happened:** Two sell orders (PFE and GOOG, 09/15) appear in the "Open Orders" table with **"Failed"** status, each with an odd partial-execution detail (e.g., "Failed 0.036519942 @ $27.43"). Comparing holdings before and after these orders:
 
-| Asset | Shares antes | Shares depois | Diferença | Bate com o "Failed" mostrado? |
+| Asset | Shares before | Shares after | Difference | Matches the shown "Failed"? |
 |---|---|---|---|---|
-| GOOG | 0.009171 | 0.003316 | 0.005855 | ✅ bate com "0.005854972" |
-| PFE | 0.177013 | 0.140493 | 0.036520 | ✅ bate com "0.036519942" |
+| GOOG | 0.009171 | 0.003316 | 0.005855 | ✅ matches "0.005854972" |
+| PFE | 0.177013 | 0.140493 | 0.036520 | ✅ matches "0.036519942" |
 
-**As duas vendas realmente aconteceram — as shares foram debitadas exatamente na quantidade que a ordem "Failed" registra — mas o status exibido diz que falhou.**
+**Both sales actually happened — shares were debited exactly by the amount recorded in the "Failed" order — but the displayed status says it failed.**
 
-**Why this is the most severe finding of the test:** isso é pior que os 500s ou o erro de deserialização, porque aqueles pelo menos comunicavam claramente que algo deu errado. Aqui, o sistema **executa a transação e mente sobre o resultado**. Consequências reais: (1) um usuário vendo "Failed" pode tentar vender de novo, potencialmente vendendo mais do que pretendia; (2) o saldo real do usuário diverge do que ele acredita ter, sem nenhum aviso; (3) num cenário de produção com dinheiro real, isso é o tipo de bug que gera disputas de suporte e perda de confiança irreversível.
+**Why this is the test's most severe finding:** this is worse than the 500s or the deserialization error, because those at least clearly communicated something was wrong. Here, the system **executes the transaction and lies about the result**. Real consequences: (1) a user seeing "Failed" might try to sell again, potentially selling more than intended; (2) the user's real balance diverges from what they believe they have, with no warning; (3) in a real production scenario with real money, this is the kind of bug that generates support disputes and irreversible loss of trust.
 
-**Severity:** Critical — o mais alto do report inteiro. Provável causa raiz: a mesma classe de problema do FP-APP-12 (erro de comunicação entre a camada que processa a transação on-chain e a camada que atualiza o status da UI) — a transação provavelmente teve sucesso na blockchain, mas a chamada de confirmação/callback que deveria marcar "Completed" falhou ou teve timeout, deixando o status "congelado" em "Failed" por padrão de erro.
+**Severity:** Critical — the highest in the entire report. Likely root cause: the same class of problem as FP-APP-12 (a communication error between the layer that processes the on-chain transaction and the layer that updates the UI status) — the transaction probably succeeded on the blockchain, but the confirmation/callback call that should mark it "Completed" failed or timed out, leaving the status "frozen" at "Failed" as an error default.
 
-**ATUALIZAÇÃO CRÍTICA — confirmado: USDC NÃO foi creditado (pior do que parecia inicialmente):** verificando o saldo de USDC da wallet antes e depois das duas ordens "Failed": permanece em **$8.73** nas duas leituras, sem nenhum aumento. Se as vendas tivessem de fato liquidado (shares → USDC), o saldo deveria ter subido em torno de $3 (≈$0.99 do PFE + ≈$2.00 do GOOG, baseado nos valores de mercado no momento). Isso muda a gravidade do achado: não é apenas "status incorreto numa transação que teve sucesso" — é **shares debitadas do holdings sem o USDC correspondente aparecer na wallet**. Duas hipóteses, ambas graves:
-1. A perna de venda do swap (shares → SOL/USDC) executou on-chain (por isso os holdings caíram), mas a perna de crédito falhou de verdade, deixando o usuário com posição reduzida e sem receber nada em troca — perda real de valor.
-2. O número de shares exibido no Holdings é decrementado de forma otimista/local assim que a ordem é enviada, antes de confirmação on-chain — e nesse caso a UI está mentindo sobre o saldo real na direção oposta (mostra menos do que você realmente tem), o que também é grave, só que num sentido diferente (sugere vender de novo o que já foi "gasto" só na tela).
+**CRITICAL UPDATE — confirmed: USDC was NOT credited (worse than it initially seemed):** checking the wallet's USDC balance before and after the two "Failed" orders: it stays at **$8.73** in both readings, with no increase. If the sales had actually settled (shares → USDC), the balance should have risen by roughly $3 (≈$0.99 from PFE + ≈$2.00 from GOOG, based on market values at the time). This changes the finding's severity: it's not just "incorrect status on a transaction that succeeded" — it's **shares debited from holdings with no corresponding USDC appearing in the wallet**. Two hypotheses, both serious:
+1. The sell leg of the swap (shares → SOL/USDC) executed on-chain (which is why holdings dropped), but the credit leg genuinely failed, leaving the user with a reduced position and nothing received in exchange — real value loss.
+2. The share count shown in Holdings is decremented optimistically/locally as soon as the order is submitted, before on-chain confirmation — and in that case the UI is lying about the real balance in the opposite direction (showing less than you actually have), which is also serious, just in a different sense (suggests selling again something already "spent" only on screen).
 
-**RESOLVIDO via Solscan devnet — causa raiz confirmada, reclassificação necessária:** inspecionando o histórico on-chain da wallet (`solscan.io/account/DHG4p1...RnNV?cluster=devnet`), as duas ordens de venda aparecem como instrução `placeSellOrder` (timestamps batendo exatamente com os horários das ordens "Failed"), mas **não existe nenhuma instrução `fulfillSellOrder` ou equivalente de liquidação/settlement subsequente** nas transações mais recentes da wallet. Ou seja: a ordem foi colocada on-chain de verdade (por isso os holdings caem — as shares ficam reservadas/travadas na ordem pendente), mas o passo de *fulfillment* (que devolveria USDC e finalizaria a venda) nunca aconteceu.
+**RESOLVED via Solscan devnet — root cause confirmed, reclassification needed:** inspecting the wallet's on-chain history (`solscan.io/account/DHG4p1...RnNV?cluster=devnet`), both sell orders appear as a `placeSellOrder` instruction (timestamps matching exactly the "Failed" orders' times), but **there's no `fulfillSellOrder` or equivalent settlement instruction following it** in the wallet's most recent transactions. So: the order was genuinely placed on-chain (which is why holdings drop — shares get reserved/locked in the pending order), but the fulfillment step (which would return USDC and finalize the sale) never happened.
 
-**Reclassificação:** isso não é "shares perdidas sem contrapartida" (hipótese 1) — é uma ordem que ficou **travada em estado pendente/não-preenchido, e a UI rotula incorretamente esse estado como "Failed"** (terminal, implica que nada aconteceu) quando deveria mostrar algo como "Pending Fulfillment" ou "Awaiting Settlement". O botão "Cancel" visível na tabela de Open Orders provavelmente devolveria as shares — mas isso não foi testado ainda.
+**Reclassification:** this isn't "shares lost with no compensation" (hypothesis 1) — it's an order that got **stuck in a pending/unfulfilled state, and the UI incorrectly labels that state as "Failed"** (terminal, implying nothing happened) when it should show something like "Pending Fulfillment" or "Awaiting Settlement." The "Cancel" button visible in the Open Orders table would likely return the shares — but that hasn't been tested yet.
 
-**Achado bônus relevante (conecta com FP-APP-4/6):** no histórico de compras mais antigas da mesma wallet, aparece um padrão repetido de `adminThaw` seguido de `fulfillBuyOrderFreezeGated` — essa é a implementação real do mecanismo de freeze/thaw do Token-2022 que os docs (`/security-and-compliance`) descrevem como enforcement de KYC. Confirma que a arquitetura de compliance existe on-chain (tokens nascem "congelados" e um `adminThaw` os libera), mas no devnet esse thaw parece acontecer automaticamente/sem gate visível de KYC real — consistente com nossa observação de que nenhum passo de KYC apareceu na UI.
+**Bonus relevant finding (connects to FP-APP-4/6):** in the same wallet's older purchase history, there's a repeated pattern of `adminThaw` followed by `fulfillBuyOrderFreezeGated` — this is the real implementation of the Token-2022 freeze/thaw mechanism the docs (`/security-and-compliance`) describe as KYC enforcement. Confirms the compliance architecture exists on-chain (tokens are minted "frozen" and an `adminThaw` releases them), but on devnet this thaw seems to happen automatically/with no visible real KYC gate — consistent with our observation that no KYC step appeared in the UI.
 
-**Severity revisada:** Critical se mantém — não por perda de fundos, mas porque (a) o rótulo "Failed" é factualmente incorreto e engana o usuário sobre o estado real da sua posição, e (b) shares ficam efetivamente indisponíveis (nem na carteira pra vender de novo, nem convertidas em USDC) até o usuário descobrir que precisa cancelar manualmente — se é que o cancel resolve.
+**Revised severity:** stays Critical — not because of fund loss, but because (a) the "Failed" label is factually incorrect and misleads the user about the real state of their position, and (b) shares become effectively unavailable (neither in the wallet to sell again, nor converted into USDC) until the user discovers they need to cancel manually — if the cancel even resolves it.
 
-**TODO:** testar clicar "Cancel" numa dessas ordens travadas e confirmar se as shares voltam pro holdings.
-
----
-
-## FP-APP-17 — Modal de confirmação de venda reusa o texto "Your purchase has been confirmed" (bug de template, confirmado independentemente)
-
-**What happened:** Ao confirmar uma venda de GOOG e de PFE, o modal de sucesso mostra **"Your purchase has been confirmed"** — mesmo sendo uma venda, não uma compra (screenshots 44, 45; mostrado no popup mesmo após clicar SELL). Isso confirma exatamente o que o outro tester independente (@blessedboy32) reportou publicamente: "Sell confirmation modal still says 'Your purchase has been confirmed' (reused buy template)".
-
-**Severity:** Medium/High — não é financeiramente perigoso sozinho, mas é confuso (usuário vendendo pode se assustar achando que comprou por engano) e, combinado com o FP-APP-16 acima, adiciona mais uma camada de sinais contraditórios exatamente no fluxo mais sensível do produto (mover dinheiro).
-
-**Suggested improvement:** Criar um modal de confirmação de venda próprio ("Your sale has been confirmed" + ícone/copy adequados), não reaproveitar o de compra.
+**TODO:** test clicking "Cancel" on one of these stuck orders and confirm whether the shares return to holdings.
 
 ---
 
-## FP-APP-18 — Phantom bloqueia SELL também, não só BUY
+## FP-APP-17 — Sell confirmation modal reuses the "Your purchase has been confirmed" copy (template bug, independently confirmed)
 
-**What happened:** O mesmo alerta "Pedido bloqueado" do Phantom (FP-APP-5) apareceu numa tentativa de **venda** de GOOG (screenshot 43), confirmando que o bloqueio de segurança cobre qualquer transação da dApp, não só compras. Isso amplia o escopo do achado #1 do report — o problema não é específico do fluxo de compra, é qualquer interação com o contrato.
+**What happened:** Upon confirming a GOOG and a PFE sale, the success modal shows **"Your purchase has been confirmed"** — even though it was a sale, not a purchase (screenshots 44, 45; shown in the popup even after clicking SELL). This confirms exactly what the other independent tester (@blessedboy32) reported publicly: "Sell confirmation modal still says 'Your purchase has been confirmed' (reused buy template)."
 
-**Severity:** já coberto pelo Critical do FP-APP-5, essa é só uma confirmação de escopo mais amplo — vale mencionar no texto final.
+**Severity:** Medium/High — not financially dangerous on its own, but confusing (a user selling might be alarmed thinking they bought by mistake), and combined with FP-APP-16 above, adds another layer of contradictory signals exactly in the product's most sensitive flow (moving money).
 
----
-
-## FP-APP-19 — Sem filtro de "só meus ativos" na tabela de Trade/Sell
-
-**What happened:** O dropdown "All Types" só filtra por Stocks/ETFs (screenshot 40), não existe opção de "My Holdings" ou "Owned only" pra ver rapidamente só os ativos que o usuário já possui. Com portfólio de 6+ ativos, achar os que você tem exige rolar a tabela inteira e checar a coluna "Shares owned" manualmente.
-
-**Severity:** Medium — friction real de usabilidade, mais perceptível quanto mais ativos o usuário acumula (como no nosso caso, após a diversificação da semana).
-
-**Suggested improvement:** Adicionar "My Holdings" como opção no dropdown "All Types", ou um toggle rápido acima da tabela.
+**Suggested improvement:** Create a dedicated sell confirmation modal ("Your sale has been confirmed" + appropriate icon/copy), don't reuse the buy one.
 
 ---
 
-## Nota — Earn confirmado como não disponível ainda (não é falha nossa de teste)
+## FP-APP-18 — Phantom also blocks SELL, not just BUY
 
-A aba Earn mostra "Earn is coming soon. Lending vaults are on the way. In the meantime, you can trade tokenized stocks or borrow against the ones you already hold, at 0% interest." (screenshot 46) — confirma o que o brief da bounty já avisava (lending market "rolling out soon"). Não testamos o lado lender porque **não existe ainda em beta**, não por lacuna nossa. Vale mencionar no report pra deixar claro que a cobertura de "DeFi/tokenization analysis" ficou limitada ao lado borrower por escopo do produto, não por omissão do teste.
+**What happened:** The same Phantom "Request blocked" alert (FP-APP-5) appeared on a **sell** attempt for GOOG (screenshot 43), confirming that the security block covers any dApp transaction, not just purchases. This widens the scope of the report's #1 finding — the problem isn't specific to the buy flow, it's any interaction with the contract.
 
----
-
-## FP-MOBILE-1 — CRÍTICO: página falha completamente em mobile com throttling Slow 4G (NO_FCP)
-
-**What happened:** Rodando PageSpeed Insights em modo Mobile (Moto G Power emulado, Slow 4G throttling) na home `beta.spout.finance` (screenshot/doc 9, capturado 15/09), **a página não renderizou nenhum conteúdo**: "The page did not paint any content... (NO_FCP)" — erro em TODAS as métricas (FCP, LCP, TBT, CLS, Speed Index) e em praticamente toda a auditoria de Accessibility, Best Practices e SEO ("Error!" generalizado, porque o Lighthouse não conseguiu nem carregar a página pra analisar).
-
-**Why this is critical:** O Lighthouse desktop rodado anteriormente (FP-APP-11) deu 100/100/100/91 — excelente. Esse resultado mobile é o oposto completo: falha total de renderização sob condições de rede realistas (Slow 4G é o cenário padrão de teste do Google pra simular conexão móvel comum, não um caso extremo). Isso sugere um problema sério de performance/bundle size que só se manifesta sob banda limitada — coerente com o padrão de polling ineficiente já documentado (FP-APP-10) e o bundle JS fortemente fragmentado em dezenas de chunks (visto no Sources tab, FP-APP-11) que pode estar competindo por banda limitada de forma severa.
-
-**Severity:** Critical — significativa parcela do tráfego real de qualquer produto (inclusive DeFi) vem de mobile, e "a página não carrega" é o pior resultado possível, pior que qualquer bug individual de UX.
-
-**TODO:** reproduzir manualmente num dispositivo mobile real com throttling de rede (Chrome DevTools mobile emulation + Network throttling) pra confirmar visualmente o que acontece — tela branca? Loading infinito? — e capturar screenshot/vídeo como evidência mais direta que só o relatório do Lighthouse.
+**Severity:** already covered by FP-APP-5's Critical rating, this is just a confirmation of broader scope — worth mentioning in the final text.
 
 ---
 
-**Checkpoint final (17/09):** Portfolio $21.26, Unrealized P&L -$0.05 (-0.18%), Available Borrowing Power $10.63, Total Borrowed $0.00. Gráfico do 1W mostra pico de $25.94 em 17/09 18h, com leve queda até o momento da leitura — variação real capturada ao longo da semana toda, do fill inicial até agora. **Monitoramento de posição encerrado aqui — segue pra montagem do report final.**
+## FP-APP-19 — No "my holdings only" filter in the Trade/Sell table
+
+**What happened:** The "All Types" dropdown only filters by Stocks/ETFs (screenshot 40), there's no "My Holdings" or "Owned only" option to quickly see only the assets the user already owns. With a 6+ asset portfolio, finding your own holdings requires scrolling the entire table and manually checking the "Shares owned" column.
+
+**Severity:** Medium — real usability friction, more noticeable the more assets a user accumulates (as in our case, after the week's diversification).
+
+**Suggested improvement:** Add "My Holdings" as an option in the "All Types" dropdown, or a quick toggle above the table.
 
 ---
 
-## FP-APP-20 — CRÍTICO: Portfolio inteiro zera ("No Holdings", "No Metrics") apesar das posições existirem
+## Note — Earn confirmed as not yet available (not our testing gap)
 
-**What happened:** Numa sessão posterior (19/09), a tela de Portfolio mostra "No Holdings — Trade tokenized stocks to build your portfolio" e "No Metrics — Build your portfolio to see your total equity, borrowed amount, and net worth" — como se a conta nunca tivesse tido nenhuma posição. Só que o gráfico de "Portfolio Overview" no mesmo instante ainda mostra o pico histórico "$27.35, Sep 19, 12:00 AM", provando que os dados existiram e foram registrados. As 6 posições diversificadas (GOOG, MSTR, BSOL, PFE, GS, AAPL) simplesmente não aparecem mais.
-
-**Why this is critical:** É o mesmo padrão de falha já visto em FP-APP-12/16 (API de dados falhando e a UI caindo num empty state incorreto, em vez de mostrar erro ou dado cacheado), só que agora atinge a visão mais importante do produto pro usuário — "quanto eu tenho". Diferente de um erro pontual numa tela secundária, esse esconde o portfólio inteiro.
-
-**Severity:** Critical — não há indicação de liquidação real (Total Borrowed sempre foi $0, sem risco de margin call), então é quase certamente um bug de exibição/fetch, não perda real — mas a experiência pro usuário é indistinguível de "meu dinheiro sumiu" até prova em contrário.
+The Earn tab shows "Earn is coming soon. Lending vaults are on the way. In the meantime, you can trade tokenized stocks or borrow against the ones you already hold, at 0% interest." (screenshot 46) — confirms what the bounty brief already warned ("lending market rolling out soon"). We didn't test the lender side because **it doesn't exist yet in beta**, not due to a gap on our end. Worth mentioning in the report to make clear that "DeFi/tokenization analysis" coverage was limited to the borrower side by product scope, not by test omission.
 
 ---
 
-## FP-APP-21 — Labels de ativo corrompidos na tabela de Open Orders (regressão)
+## FP-MOBILE-1 — CRITICAL: page completely fails on mobile with Slow 4G throttling (NO_FCP)
 
-**What happened:** As mesmas duas ordens travadas do FP-APP-16 (PFE e GOOG, vistas nos dias anteriores como "PFECLzi…UbBA" e "GOOG7zo3…H3nV" — ticker + endereço) agora aparecem como **"EG3r…CLzi…UbBA"** e **"6a2y…7zo3…H3nV"** — o ticker sumiu completamente, restando só fragmentos de endereço on-chain, ilegíveis pro usuário.
+**What happened:** Running PageSpeed Insights in Mobile mode (emulated Moto G Power, Slow 4G throttling) on the `beta.spout.finance` home page (screenshot/doc 9, captured 09/15), **the page didn't render any content**: "The page did not paint any content... (NO_FCP)" — an error across ALL metrics (FCP, LCP, TBT, CLS, Speed Index) and in nearly the entire Accessibility, Best Practices, and SEO audit (a generalized "Error!," because Lighthouse couldn't even load the page to analyze it).
 
-**Why this matters:** É uma regressão — a mesma tela piorou ao longo do teste, não melhorou. Combinado com o FP-APP-20, sugere uma falha mais ampla na camada que resolve metadata de ativos (nome/ticker) a partir do endereço on-chain, não só nessas duas telas específicas.
+**Why this is critical:** The earlier desktop Lighthouse run (FP-APP-11) gave 100/100/100/91 — excellent. This mobile result is the complete opposite: total rendering failure under realistic network conditions (Slow 4G is Google's default test scenario for a common mobile connection, not an extreme case). This suggests a serious bundle-size/performance issue that only manifests under limited bandwidth, consistent with the already-documented inefficient polling pattern (FP-APP-10) and the heavily fragmented JS bundle across dozens of chunks (seen in the Sources tab, FP-APP-11), which may be competing severely for limited bandwidth.
 
-**Severity:** Medium/High — não esconde dinheiro, mas destrói a legibilidade de uma tela que já estava com status incorreto ("Failed").
+**Severity:** Critical — a significant share of any real product's traffic (DeFi included) comes from mobile, and "the page doesn't load" is the worst possible outcome, worse than any individual UX bug.
+
+**TODO:** manually reproduce on a real mobile device with network throttling (Chrome DevTools mobile emulation + Network throttling) to visually confirm what happens — white screen? infinite loading? — and capture a screenshot/video as more direct evidence than just the Lighthouse report.
 
 ---
 
-## Log de transações on-chain (preencher conforme testar)
+**Final checkpoint (09/17):** Portfolio $21.26, Unrealized P&L -$0.05 (-0.18%), Available Borrowing Power $10.63, Total Borrowed $0.00. The 1W chart shows a peak of $25.94 on 09/17 at 6 PM, with a slight decline through the time of reading — real variation captured across the entire week, from the initial fill to now. **Position monitoring ends here — moving on to final report assembly.**
 
-| Action | Amount | Asset | Transaction | Data |
+---
+
+## FP-APP-20 — CRITICAL: The entire portfolio zeroes out ("No Holdings," "No Metrics") despite the positions existing
+
+**What happened:** In a later session (09/19), the Portfolio screen shows "No Holdings — Trade tokenized stocks to build your portfolio" and "No Metrics — Build your portfolio to see your total equity, borrowed amount, and net worth" — as if the account never had any position. Yet the "Portfolio Overview" chart at the same moment still shows the historical peak "$27.35, Sep 19, 12:00 AM," proving the data existed and was recorded. The 6 diversified positions (GOOG, MSTR, BSOL, PFE, GS, AAPL) simply no longer appear.
+
+**Why this is critical:** It's the same failure pattern already seen in FP-APP-12/16 (a data API failing and the UI falling into an incorrect empty state, instead of showing an error or cached data), except now it hits the product's most important view for the user — "how much do I have." Unlike an isolated bug on a secondary screen, this one hides the entire portfolio.
+
+**Severity:** Critical — there's no indication of a real liquidation (Total Borrowed has always been $0, no margin-call risk), so this is almost certainly a display/fetch bug, not real loss — but the user experience is indistinguishable from "my money is gone" until proven otherwise.
+
+**UPDATE — confirmed as persistent, not one-off:** checked again on 09/21 (2 days after the first record): "No Holdings" and "No Metrics" are still there, now with the chart showing an updated peak of $28.08 (09/21, 6 PM) and Unrealized P&L +$2.35 (+9.06%) — meaning the system keeps tracking and correctly updating the position's historical value in the background, but the holdings/metrics screen simply never goes back to showing data. This isn't a one-off network glitch — it's a permanently broken state for this specific account, for at least 2 days. Reinforces the Critical severity: a real user in this situation has no way, inside the product, to see what they own.
+
+---
+
+## FP-APP-21 — Corrupted asset labels in the Open Orders table (regression)
+
+**What happened:** The same two stuck orders from FP-APP-16 (PFE and GOOG, seen on prior days as "PFECLzi…UbBA" and "GOOG7zo3…H3nV" — ticker + address) now appear as **"EG3r…CLzi…UbBA"** and **"6a2y…7zo3…H3nV"** — the ticker has completely disappeared, leaving only illegible on-chain address fragments.
+
+**Why this matters:** It's a regression — the same screen got worse over the course of testing, not better. Combined with FP-APP-20, it suggests a broader failure in the layer that resolves asset metadata (name/ticker) from an on-chain address, not isolated to these two specific screens.
+
+**Severity:** Medium/High — doesn't hide money, but destroys the readability of a screen that was already showing an incorrect status ("Failed").
+
+---
+
+## On-chain transaction log (fill in as tested)
+
+| Action | Amount | Asset | Transaction | Date |
 |---|---|---|---|---|
-| Buy | $3.00 | GOOG (0.01 shares, rounded) | 4ZReviwT... (confirmar hash completo no explorer) | 09/09/2026, market closed, fills 9:30 AM ET 10/09 |
+| Buy | $3.00 | GOOG (0.01 shares, rounded) | 4ZReviwT... (confirm full hash on explorer) | 09/09/2026, market closed, fills 9:30 AM ET 09/10 |
 
 ---
 
-## Ideias soltas / observações do dia 0
+## Loose ideas / Day 0 observations
 
 -
