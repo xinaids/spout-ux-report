@@ -1,14 +1,14 @@
 # Spout UX & Product Feedback Report
 
-> **9-day real-usage test of RWA-collateralized borrowing on Solana**
+> **12-day real-usage test of RWA-collateralized borrowing on Solana**
 > Submitted for the [Superteam x Spout Finance Beta Intelligence Challenge](https://earn.superteam.fun/listing/product-feedback-spout-finance)
-> By [@0xinaids](https://x.com/0xinaids) — September 9–17, 2026
+> By [@0xinaids](https://x.com/0xinaids) — September 9–21, 2026
 
 ---
 
 ## Overview
 
-This report documents a 9-day hands-on test of [Spout Finance](https://spout.finance) — a Solana-based DeFi brokerage that lets users borrow stablecoins at 0% interest against tokenized US equities, funded by a covered-call strategy on the collateral pool instead of borrower interest.
+This report documents a 12-day hands-on test of [Spout Finance](https://spout.finance) — a Solana-based DeFi brokerage that lets users borrow stablecoins at 0% interest against tokenized US equities, funded by a covered-call strategy on the collateral pool instead of borrower interest.
 
 Testing was done with a diversified real position (6 assets, varying volatility), no guided tutorial, full documentation review before touching the app, DevTools inspection, on-chain verification via Solscan, and Lighthouse audits on both desktop and mobile.
 

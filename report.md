@@ -2,7 +2,7 @@
 ### Testing Report, UX Audit, and DeFi/Tokenization Analysis
 
 **Reviewer:** Mateus Schneider (@0xinaids) — full-stack Solana developer (Rust/Anchor), Superteam bounty hunter
-**Testing period:** Sep 9–17, 2026 (9 days, real position held on devnet throughout the entire period)
+**Testing period:** Sep 9–21, 2026 (12 days, real position held on devnet throughout the entire period)
 **Environment:** Solana Devnet · Wallet `DHG4p1tKiXuQS2oYUMAnxR1P4YDgzGdkQfzJZfYoRnNV`
 **Methodology:** full documentation review (31 pages) before touching the product, testing without a guided tutorial, diversification across 6 real positions, 9 consecutive days of portfolio monitoring, DevTools inspection (Network/Console/Sources), desktop and mobile Lighthouse audits, on-chain verification via Solscan devnet.
 
@@ -10,12 +10,12 @@
 
 ## 0. Executive Summary
 
-**26 findings** documented, broken down by severity:
+**28 findings** documented, broken down by severity:
 
 | Severity | Count | Highlights |
 |---|---|---|
-| **Critical** | 8 | Sell order marked "Failed" but stuck mid-execution on-chain (FP-APP-16); site fails to render on mobile/Slow 4G (FP-MOBILE-1); Phantom Wallet fully blocks any transaction (FP-APP-5); raw account error + systematic 500s on `/vault/deposit` and `/vault/borrow` (FP-APP-12); incorrect Avg Cost/P&L on AAPL (FP-APP-15); liquidation fee documented as 5% flat but 8.8% in practice (FP-DOC-2); KYC publicly claimed but absent in practice (FP-APP-4/6) |
-| **High** | 5 | "Borrow Cost" column contradicts the "0% Always" banner (FP-APP-1); devnet environment not persistently flagged (FP-APP-14); yield figures diverge across docs pages (FP-DOC-1); "no losing your upside" contradicts the actual assignment mechanic (FP-DOC-3) |
+| **Critical** | 9 | Entire portfolio showing "No Holdings"/"No Metrics" for 2+ consecutive days despite chart data still updating (FP-APP-20); sell order marked "Failed" but stuck mid-execution on-chain (FP-APP-16); site fails to render on mobile/Slow 4G (FP-MOBILE-1); Phantom Wallet fully blocks any transaction (FP-APP-5); raw account error + systematic 500s on `/vault/deposit` and `/vault/borrow` (FP-APP-12); incorrect Avg Cost/P&L on AAPL (FP-APP-15); liquidation fee documented as 5% flat but 8.8% in practice (FP-DOC-2); KYC publicly claimed but absent in practice (FP-APP-4/6) |
+| **High** | 6 | "Borrow Cost" column contradicts the "0% Always" banner (FP-APP-1); devnet environment not persistently flagged (FP-APP-14); yield figures diverge across docs pages (FP-DOC-1); "no losing your upside" contradicts the actual assignment mechanic (FP-DOC-3); asset tickers in Open Orders replaced with garbled address fragments, a regression (FP-APP-21) |
 | **Medium** | 7 | Borrow panel opens on the wrong asset by default (FP-APP-13); undocumented terms (FP-DOC-4/5); "Executing" status shown incorrectly while market is closed (FP-APP-7); "2%" flash during landing page load (FP-LANDING-1); no "my holdings" filter (FP-APP-19); sell modal reuses buy confirmation copy (FP-APP-17) |
 | **Low** | 4 | Share rounding (resolved in Portfolio view); inefficient RPC polling; SEO 91/100 |
 
@@ -57,6 +57,16 @@ The landing page (`spout.finance`) has strong design — dark theme, neon blue a
 ## 4. Friction Points (by severity)
 
 ### 🔴 CRITICAL
+
+**FP-APP-20 — Entire portfolio shows "No Holdings"/"No Metrics" for multiple consecutive days, despite the underlying data still existing**
+
+Starting around Sep 19, the Portfolio screen began showing "No Holdings — Trade tokenized stocks to build your portfolio" and "No Metrics — Build your portfolio to see your total equity, borrowed amount, and net worth," as if the account had never held any position. The "Portfolio Overview" performance chart in the same view kept updating correctly in the background — it showed a historical peak of $27.35 (Sep 19) and later $28.08 (Sep 21, +9.06% unrealized P&L) — proving the underlying position data still exists and is being tracked, just not surfaced in the holdings/metrics views. Checked again two days later (Sep 21): the exact same broken state persists. This is not a one-off glitch; it's a sustained failure for this specific account, lasting at least 2+ days.
+
+*Why this is critical:* there is no indication of a real liquidation (Total Borrowed has always been $0, no margin-call risk), so this is almost certainly a display/fetch bug rather than actual loss — but the user experience is indistinguishable from "my money is gone" until proven otherwise, and a real user in this state has no way, inside the product, to see what they own.
+
+*Suggested fix:* investigate why the holdings/metrics endpoints fail persistently for this account while the chart/history endpoints keep working; add a fallback state that shows cached last-known values with a "data may be stale" notice instead of a blank "No Holdings" empty state.
+
+---
 
 **FP-APP-16 — Sell orders stuck in an intermediate on-chain state, incorrectly labeled "Failed"**
 
@@ -131,6 +141,9 @@ The "Wallet verified for devnet" toast appears once and disappears; there's no p
 
 **FP-DOC-3 — "No losing your upside" contradicts the real assignment mechanic**
 The landing page/`/introduction` promises "no losing your upside"; `/covered-call-strategy` and `/options-assignment` make clear that upon assignment, shares are sold at the strike, sacrificing upside above it for that cycle.
+
+**FP-APP-21 — Asset tickers in Open Orders replaced with garbled address fragments (regression)**
+The same two stuck orders from FP-APP-16 (PFE and GOOG, initially shown as "PFECLzi…UbBA" and "GOOG7zo3…H3nV" — ticker prefixed to address) later rendered as "EG3r…CLzi…UbBA" and "6a2y…7zo3…H3nV" — the ticker disappeared entirely, leaving only illegible on-chain address fragments. This is a regression: the same screen got worse over the course of testing, not better. Combined with FP-APP-20, it suggests a broader failure in the layer that resolves asset metadata (name/ticker) from on-chain addresses, not isolated to these two specific screens.
 
 ---
 
