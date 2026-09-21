@@ -44,6 +44,9 @@ The landing page (`spout.finance`) has strong design — dark theme, neon blue a
 
 **Additional finding via SSR source HTML inspection (schema.org):** the structured `FAQPage` block (indexed by Google/AI crawlers) contains the claim: *"enforces wallet-level KYC on all tokenized asset holders."* See Section 4, FP-APP-4/6, for the contradiction with observed behavior.
 
+![Landing page "2%" flash](assets/screenshots/19-landing-2pct-interest.png)
+![Landing page correct "0%" hero](assets/screenshots/28-landing-hero-billionaire.png)
+
 ---
 
 ## 3. First Impressions (Session 1, no tutorial)
@@ -66,6 +69,8 @@ Starting around Sep 19, the Portfolio screen began showing "No Holdings — Trad
 
 *Suggested fix:* investigate why the holdings/metrics endpoints fail persistently for this account while the chart/history endpoints keep working; add a fallback state that shows cached last-known values with a "data may be stale" notice instead of a blank "No Holdings" empty state.
 
+![Portfolio showing No Holdings / No Metrics](assets/screenshots/38-portfolio-week-view.png)
+
 ---
 
 **FP-APP-16 — Sell orders stuck in an intermediate on-chain state, incorrectly labeled "Failed"**
@@ -77,6 +82,8 @@ This is not a fund loss — it's an order stuck in a pending state that the UI i
 *Bonus technical finding:* the same wallet's purchase history shows a repeated pattern of `adminThaw` followed by `fulfillBuyOrderFreezeGated` — confirming that the compliance architecture (Token-2022 transfer hooks described in the docs) genuinely exists on-chain, with tokens minted "frozen" and released by an admin instruction. On devnet, this thaw appears to happen automatically, with no visible real KYC gate.
 
 *Suggested fix:* rename the status to reflect the real state ("Pending Fulfillment"/"Stuck — Contact Support"), investigate why fulfillment isn't being triggered after placement, and consider an automatic timeout with cancel/retry.
+
+![Open Orders showing Failed status](assets/screenshots/35-open-orders-5-assets-11set.png)
 
 ---
 
@@ -94,6 +101,8 @@ Every transaction tested (buying GOOG, BSOL, PFE; selling GOOG) triggered escala
 
 *Suggested fix:* request an allowlist/false-positive review from Phantom's security team before public launch; consider adding an in-app notice preparing users for this alert during the beta period.
 
+![Phantom Wallet "Request blocked" warning](assets/screenshots/14-phantom-full-block-pfe.png)
+
 ---
 
 **FP-APP-12 — Raw on-chain account error + systematic 500s on `/api/vault/deposit` and `/api/vault/borrow`**
@@ -102,6 +111,8 @@ The Borrow screen displayed the raw error `CollateralType: unexpected length 213
 
 *Suggested fix:* never let a parsing exception leak as raw text into the UI; investigate why both endpoints return 500 (likely related to the same underlying account mechanism causing FP-APP-16); handle the 500 client-side without propagating it as "$0.00 capacity."
 
+![Raw CollateralType error in Borrow UI](assets/screenshots/18-goog-borrow-panel-500-persists.png)
+
 ---
 
 **FP-APP-15 — Incorrect Avg Cost and P&L for AAPL (financial data integrity bug)**
@@ -109,6 +120,8 @@ The Borrow screen displayed the raw error `CollateralType: unexpected length 213
 Of the 6 diversified positions, 5 calculate correctly (mathematically validated: shares × avg cost = original order value, and P&L matches the difference between avg cost and current price). The AAPL position is the outlier: displayed Avg Cost is $334.62, while the asset's current price is ~$228.50 (a 46% difference). If Avg Cost were correct, the real loss would be -31.7% (~$1.58); the screen shows "-0.50%" — a third, entirely different number that matches neither the wrong Avg Cost nor a correct one. This suggests two diverging data sources feeding Avg Cost and the P&L display.
 
 *Suggested fix:* audit the execution-price recording at fill time for AAPL specifically (possible cache/price collision with another asset); ensure P&L always derives from the same Avg Cost shown, never from a separate source.
+
+![Holdings table showing incorrect AAPL Avg Cost](assets/screenshots/36-holdings-6-assets-monday.png)
 
 ---
 
@@ -132,6 +145,13 @@ The source HTML of `spout.finance` contains a structured `FAQPage` block with tw
 
 **FP-APP-1 — "Borrow Cost" column with values >0% contradicts the "0% Interest. Always." banner**
 Same Trade screen: the banner promises "always 0%," the asset table shows a Borrow Cost of 0.06% to 0.86%/yr per asset. The real explanation (found via the public FAQ, not the UI): this cost is the average covered-call assignment risk (~0.5% historical annualized), not traditional interest — but this is never explained inside the product, only in the external FAQ.
+
+![Trade screen: Borrow Cost column vs 0% banner](assets/screenshots/01-trade-screen-first-view.png)
+
+**Proposed fix:**
+
+![Current vs Proposed mockup — Trade screen](assets/screenshots/26-mockup-current-final.png)
+![Current vs Proposed mockup — proposed version](assets/screenshots/27-mockup-proposed-final.png)
 
 **FP-APP-14 — Devnet environment not persistently flagged**
 The "Wallet verified for devnet" toast appears once and disappears; there's no persistent badge reminding the user they're in a test environment while navigating. This produced genuine confusion even for a technically experienced user.
