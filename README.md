@@ -106,5 +106,6 @@ Rename the column to "Est. Leverage Cost," add an info icon, and bridge it with 
 
 - 📄 [Full Report](https://github.com/xinaids/spout-ux-report/blob/main/report.md)
 - 🐦 [X Thread](https://x.com/0xinaids/status/2098174491742339135)
+- 🎥 [Video Walkthrough](https://youtu.be/zO3SH9nMgsQ)
 - 🎨 [Visual Mockups](https://github.com/xinaids/spout-ux-report/tree/main/assets/screenshots)
 - 🏆 [Bounty Listing](https://earn.superteam.fun/listing/product-feedback-spout-finance)

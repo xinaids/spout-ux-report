@@ -5,6 +5,7 @@
 **Testing period:** Sep 9–21, 2026 (12 days, real position held on devnet throughout the entire period)
 **Environment:** Solana Devnet · Wallet `DHG4p1tKiXuQS2oYUMAnxR1P4YDgzGdkQfzJZfYoRnNV`
 **Methodology:** full documentation review (31 pages) before touching the product, testing without a guided tutorial, diversification across 6 real positions, 9 consecutive days of portfolio monitoring, DevTools inspection (Network/Console/Sources), desktop and mobile Lighthouse audits, on-chain verification via Solscan devnet.
+**Video walkthrough:** https://youtu.be/zO3SH9nMgsQ
 
 ---
 
