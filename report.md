@@ -11,14 +11,14 @@
 
 ## 0. Executive Summary
 
-**28 findings** documented, broken down by severity:
+**23 findings** documented, broken down by severity:
 
 | Severity | Count | Highlights |
 |---|---|---|
-| **Critical** | 9 | Entire portfolio showing "No Holdings"/"No Metrics" for 2+ consecutive days despite chart data still updating (FP-APP-20); sell order marked "Failed" but stuck mid-execution on-chain (FP-APP-16); site fails to render on mobile/Slow 4G (FP-MOBILE-1); Phantom Wallet fully blocks any transaction (FP-APP-5); raw account error + systematic 500s on `/vault/deposit` and `/vault/borrow` (FP-APP-12); incorrect Avg Cost/P&L on AAPL (FP-APP-15); liquidation fee documented as 5% flat but 8.8% in practice (FP-DOC-2); KYC publicly claimed but absent in practice (FP-APP-4/6) |
-| **High** | 6 | "Borrow Cost" column contradicts the "0% Always" banner (FP-APP-1); devnet environment not persistently flagged (FP-APP-14); yield figures diverge across docs pages (FP-DOC-1); "no losing your upside" contradicts the actual assignment mechanic (FP-DOC-3); asset tickers in Open Orders replaced with garbled address fragments, a regression (FP-APP-21) |
+| **Critical** | 8 | Entire portfolio showing "No Holdings"/"No Metrics" for 2+ consecutive days despite chart data still updating (FP-APP-20); sell order marked "Failed" but stuck mid-execution on-chain (FP-APP-16); site fails to render on mobile/Slow 4G (FP-MOBILE-1); Phantom Wallet fully blocks any transaction (FP-APP-5); raw account error + systematic 500s on `/vault/deposit` and `/vault/borrow` (FP-APP-12); incorrect Avg Cost/P&L on AAPL (FP-APP-15); liquidation fee documented as 5% flat but 8.8% in practice (FP-DOC-2); KYC publicly claimed but absent in practice (FP-APP-4/6) |
+| **High** | 5 | "Borrow Cost" column contradicts the "0% Always" banner (FP-APP-1); devnet environment not persistently flagged (FP-APP-14); yield figures diverge across docs pages (FP-DOC-1); "no losing your upside" contradicts the actual assignment mechanic (FP-DOC-3); asset tickers in Open Orders replaced with garbled address fragments, a regression (FP-APP-21) |
 | **Medium** | 7 | Borrow panel opens on the wrong asset by default (FP-APP-13); undocumented terms (FP-DOC-4/5); "Executing" status shown incorrectly while market is closed (FP-APP-7); "2%" flash during landing page load (FP-LANDING-1); no "my holdings" filter (FP-APP-19); sell modal reuses buy confirmation copy (FP-APP-17) |
-| **Low** | 4 | Share rounding (resolved in Portfolio view); inefficient RPC polling; SEO 91/100 |
+| **Low** | 3 | Share rounding (resolved in Portfolio view); inefficient RPC polling; SEO 91/100 |
 
 **The core thesis in two sentences:** the product has a genuinely differentiated financial model (RWA as collateral, yield via covered calls, conservative 50% LTV) and a back-end that, most of the time, calculates correctly — but the communication layer (marketing, docs, error messages, transaction status) has not been reconciled with the actual implementation anywhere. The result is a product that scares users on first contact (Phantom blocking the wallet), confuses them mid-flow (contradictory banners), and, in the worst case found, shows "Failed" for a transaction that actually just got stuck in an intermediate on-chain state.
 
